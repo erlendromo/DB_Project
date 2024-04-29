@@ -1,0 +1,11 @@
+services:
+  db_project:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=${PORT}
+    #volumes:
+     # - ./.secrets:/credentials:ro
+    ports:
+      - '9000:9000'
