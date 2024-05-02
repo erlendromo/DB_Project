@@ -1,6 +1,8 @@
 package router
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func NewRouter() http.Handler {
 	mux := http.NewServeMux()
