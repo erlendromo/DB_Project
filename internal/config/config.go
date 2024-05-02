@@ -9,11 +9,20 @@ import (
 )
 
 type Config struct {
-	Port          string
+	AppConfig  AppConfig
+	PSQLConfig PSQLConfig
+}
+
+type AppConfig struct {
+	Port string
+}
+
+type PSQLConfig struct {
 	PSQL_host     string
 	PSQL_port     string
 	PSQL_user     string
 	PSQL_password string
+	PSQL_dbname   string
 }
 
 func NewConfig() *Config {
@@ -47,11 +56,21 @@ func NewConfig() *Config {
 		log.Fatal("Unable to read postgresql PASSWORD from environment.")
 	}
 
+	psql_dbname, present := os.LookupEnv("PSQL_DBNAME")
+	if !present {
+		log.Fatal("Unable to read postgresql DBNAME from environment.")
+	}
+
 	return &Config{
-		Port:          port,
-		PSQL_host:     psql_host,
-		PSQL_port:     psql_port,
-		PSQL_user:     psql_user,
-		PSQL_password: psql_password,
+		AppConfig: AppConfig{
+			Port: port,
+		},
+		PSQLConfig: PSQLConfig{
+			PSQL_host:     psql_host,
+			PSQL_port:     psql_port,
+			PSQL_user:     psql_user,
+			PSQL_password: psql_password,
+			PSQL_dbname:   psql_dbname,
+		},
 	}
 }

@@ -7,13 +7,20 @@ import (
 )
 
 func Run() {
-	// Setup middlewares and initializers here
-
 	config := config.NewConfig()
 
-	db := postgresql.StartDB(config.PSQL_host, config.PSQL_port, config.PSQL_user, config.PSQL_password)
-	defer postgresql.CloseDB(db)
-	postgresql.CreateDBTables(db)
+	db := postgresql.NewPSQLDatabase(
+		config.PSQLConfig.PSQL_host,
+		config.PSQLConfig.PSQL_port,
+		config.PSQLConfig.PSQL_user,
+		config.PSQLConfig.PSQL_password,
+		config.PSQLConfig.PSQL_dbname,
+	)
+
+	db.CreateDatabase()
+	db.Start()
+	defer db.Close()
+	db.CreateTables()
 
 	server.StartServer(*config)
 }
