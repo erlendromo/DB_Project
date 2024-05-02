@@ -1,6 +1,7 @@
 package postgresql
 
 import (
+	"DB_Project/internal/datasources/database"
 	"database/sql"
 	"fmt"
 	"log"
@@ -8,45 +9,89 @@ import (
 	"github.com/lib/pq"
 )
 
-func StartDB(host, port, user, password string) *sql.DB {
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=disable", host, port, user, password)
+type PSQL_Database struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	DBName   string
 
-	db, err := sql.Open(user, psqlInfo)
+	Database *sql.DB
+}
+
+func NewPSQLDatabase(host, port, user, password, dbName string) database.Database {
+	return &PSQL_Database{
+		Host:     host,
+		Port:     port,
+		User:     user,
+		Password: password,
+		DBName:   dbName,
+	}
+}
+
+func (psqldb *PSQL_Database) CreateDatabase() {
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=disable", psqldb.Host, psqldb.Port, psqldb.User, psqldb.Password)
+
+	db, err := sql.Open(psqldb.User, psqlInfo)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = db.Exec(CREATE_DB)
-	if err != nil {
+	if _, err := db.Exec(CREATE_DB); err != nil {
 		if pgErr, ok := err.(*pq.Error); ok {
 			if pgErr.Code == "42P04" { // PostgreSQL error code for "database already exists"
-				fmt.Println("Database already exists.")
+				log.Println("Database already exists.")
 			} else {
 				log.Fatal(err)
 			}
 		}
+	} else {
+		log.Println("Created database.")
 	}
 
-	log.Println("Created database.")
+	db.Close()
+}
 
-	err = db.Ping()
+func (psqldb *PSQL_Database) Start() {
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", psqldb.Host, psqldb.Port, psqldb.User, psqldb.Password, psqldb.DBName)
+
+	db, err := sql.Open(psqldb.User, psqlInfo)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	if err = db.Ping(); err != nil {
+		log.Fatal(err)
+	}
+
 	log.Println("Successfully connected to database!")
-	return db
+	psqldb.Database = db
 }
 
-func CloseDB(db *sql.DB) {
-	if err := db.Close(); err != nil {
-		log.Fatal(err)
+func (psqldb *PSQL_Database) CreateTables() {
+	if psqldb.Database != nil {
+		for _, query := range CreateTablesList {
+			tx, err := psqldb.Database.Begin()
+			if err != nil {
+				log.Printf("Unable to establish transaction: %v", err)
+			}
+			defer tx.Rollback()
+
+			_, err = tx.Exec(query)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if err = tx.Commit(); err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
 }
 
-func CreateDBTables(db *sql.DB) {
-	for _, query := range CreateTablesList {
-		if _, err := db.Exec(query); err != nil {
+func (psqldb *PSQL_Database) Close() {
+	if psqldb != nil {
+		if err := psqldb.Database.Close(); err != nil {
 			log.Fatal(err)
 		}
 	}
