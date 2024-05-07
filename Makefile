@@ -18,4 +18,10 @@ deletedbdata:
 swag:
 	swag init -g internal/http/router/route.go && swag fmt
 
-.PHONY: composeup composedown applogs dblogs deletedbdata swag
+run:
+	swag init -g internal/http/router/route.go && swag fmt && docker compose --env-file=.env --verbose up -d --build
+
+stop:
+	docker compose --env-file=.env down && rm -r dbdata
+
+.PHONY: composeup composedown applogs dblogs deletedbdata swag run stop

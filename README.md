@@ -16,8 +16,8 @@ TODO write something here...
 ## Endpoints
 
 To see how each endpoint works, navigate to swagger-documentation on the application:
-- If run locally: `http://localhost:8080/electromart/v1/swagger`
-- If run on vm: `http://<ip-to-vm>:8080/electromart/v1/swagger`
+- If run locally: `http://localhost:8080/electromart/v1/swagger/`
+- If run on vm: `http://<ip-to-vm>:8080/electromart/v1/swagger/`
 
 ## Prerequisites
 
@@ -40,6 +40,9 @@ Before deploying the application, make sure to have the following downloaded on 
     - In a terminal of your choice, navigate to the root-directory of the project using commandline-tools (e.g. 'cd').
 
 - `Makefile commands`
+    - `make run` -> Configures swag documentation, and starts the container for the application (This is all you need to use).
+    - `make stop` -> Stops the container, and removes database-data (N.B. Use this if you want to refresh database with only dummy-data, if not -> do `make composedown`).
+    - `make swag` -> Append the swagger notation to the application.
     - `make composeup` -> Runs a docker-container in the background, setting up postgres and the application.
     - `make composedown` -> Stops the docker-container.
     - `make applogs` -> Attaches the application-logs to the terminal.
@@ -51,4 +54,4 @@ Before deploying the application, make sure to have the following downloaded on 
     - Vm-url: `http://<ip-to-vm>:8080/electromart/v1/`
 
 - `Optional`
-    - Open a browser on the URL's above (Chrome, Edge, Firefox etc.)
+    - Open a browser on the URL selected above (Chrome, Edge, Firefox etc.)
