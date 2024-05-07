@@ -1,11 +1,42 @@
+version: '3'
+
 services:
-  db_project:
+
+  electromart_app:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      - PORT=${PORT}
-    #volumes:
-     # - ./.secrets:/credentials:ro
+    restart: unless-stopped
     ports:
-      - '9000:9000'
+      - "${API_PORT}:${API_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      DB_HOST: db
+      API_PORT: ${API_PORT}
+    volumes:
+      - ./cmd/migrations:/cmd/migrations:ro
+    
+  db:
+    image: postgres:16.2-alpine3.19
+    restart: unless-stopped
+    environment:
+      PGPORT: ${DB_PORT}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - ./dbdata:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    healthcheck:
+      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
+      interval: 30s
+      timeout: 1m
+      retries: 5
+      start_period: 20s
