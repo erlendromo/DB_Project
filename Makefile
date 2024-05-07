@@ -19,9 +19,23 @@ swag:
 	swag init -g internal/http/router/route.go && swag fmt
 
 run:
-	swag init -g internal/http/router/route.go && swag fmt && docker compose --env-file=.env --verbose up -d --build
+	<absolute-path-to-swag-binary-directory>swag init -g internal/http/router/route.go && <absolute-path-to-swag-binary-directory>swag fmt && docker compose --env-file=.env --verbose up -d --build
+
+
+
+# Replace <absolute-path-to-swag-binary-directory> with the absolute path to the directory where the swag binary is located
+# Example -> <absolute-path-to-swag-binary-directory> === /Users/username/go/bin/
+# Run this if the swag binary is not in the PATH
+swagabsolute:
+	<absolute-path-to-swag-binary-directory>swag init -g internal/http/router/route.go && <absolute-path-to-swag-binary-directory>swag fmt
+
+# Replace <absolute-path-to-swag-binary-directory> with the absolute path to the directory where the swag binary is located
+# Example -> <absolute-path-to-swag-binary-directory> === /Users/username/go/bin/
+# Run this if the swag binary is not in the PATH
+runabsolute:
+	<absolute-path-to-swag-binary-directory>swag init -g internal/http/router/route.go && <absolute-path-to-swag-binary-directory>swag fmt && docker compose --env-file=.env --verbose up -d --build
 
 stop:
 	docker compose --env-file=.env down && rm -r dbdata
 
-.PHONY: composeup composedown applogs dblogs deletedbdata swag run stop
+.PHONY: composeup composedown applogs dblogs deletedbdata swag run stop swagabsolute runabsolute
