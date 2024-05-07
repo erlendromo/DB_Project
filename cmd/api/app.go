@@ -2,25 +2,26 @@ package api
 
 import (
 	"DB_Project/cmd/api/server"
+	"DB_Project/cmd/migrations"
 	"DB_Project/internal/config"
-	"DB_Project/internal/datasources/postgresql"
+
+	_ "github.com/lib/pq"
 )
 
 func Run() {
+	// Load the application configuration
 	config := config.NewConfig()
 
-	db := postgresql.NewPSQLDatabase(
-		config.PSQLConfig.PSQL_host,
-		config.PSQLConfig.PSQL_port,
-		config.PSQLConfig.PSQL_user,
-		config.PSQLConfig.PSQL_password,
-		config.PSQLConfig.PSQL_dbname,
-	)
+	// Connect to the database and read migrations
+	conn := migrations.ConnectToDB(config)
+	defer conn.Close()
+	m := migrations.MigratePSQL(config)
 
-	db.CreateDatabase()
-	db.Start()
-	defer db.Close()
-	db.CreateTables()
+	// Run migrations and ping the database
+	migrations.Guard(m.Up())
+	defer migrations.Guard(m.Down())
+	migrations.PingDB(conn)
 
+	// Start the server
 	server.StartServer(*config)
 }

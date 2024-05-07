@@ -2,75 +2,70 @@ package config
 
 import (
 	"DB_Project/internal/constants"
-	"log"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	AppConfig  AppConfig
-	PSQLConfig PSQLConfig
+	AppConfig AppConfig
+	DBConfig  DBConfig
 }
 
 type AppConfig struct {
-	Port string
+	ApiPort string
 }
 
-type PSQLConfig struct {
-	PSQL_host     string
-	PSQL_port     string
-	PSQL_user     string
-	PSQL_password string
-	PSQL_dbname   string
+type DBConfig struct {
+	Host string
+	Port string
+	User string
+	Pass string
+	Name string
+}
+
+func mustGetEnv(key string) string {
+	v, present := os.LookupEnv(key)
+	if !present {
+		panic("Missing required environment variable: " + key)
+	}
+
+	return v
 }
 
 func NewConfig() *Config {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	port, present := os.LookupEnv(constants.PORT)
-	if !present {
-		log.Println("Unable to read port from environment.")
-		port = "9000"
-	}
-
-	psql_host, present := os.LookupEnv("PSQL_HOST")
-	if !present {
-		log.Fatal("Unable to read postgresql HOST from environment.")
-	}
-
-	psql_port, present := os.LookupEnv("PSQL_PORT")
-	if !present {
-		log.Fatal("Unable to read postgresql PORT from environment.")
-	}
-
-	psql_user, present := os.LookupEnv("PSQL_USER")
-	if !present {
-		log.Fatal("Unable to read postgresql USER from environment.")
-	}
-
-	psql_password, present := os.LookupEnv("PSQL_PASSWORD")
-	if !present {
-		log.Fatal("Unable to read postgresql PASSWORD from environment.")
-	}
-
-	psql_dbname, present := os.LookupEnv("PSQL_DBNAME")
-	if !present {
-		log.Fatal("Unable to read postgresql DBNAME from environment.")
-	}
-
 	return &Config{
 		AppConfig: AppConfig{
-			Port: port,
+			ApiPort: mustGetEnv(constants.API_PORT),
 		},
-		PSQLConfig: PSQLConfig{
-			PSQL_host:     psql_host,
-			PSQL_port:     psql_port,
-			PSQL_user:     psql_user,
-			PSQL_password: psql_password,
-			PSQL_dbname:   psql_dbname,
+		DBConfig: DBConfig{
+			Host: mustGetEnv("DB_HOST"),
+			Port: mustGetEnv("DB_PORT"),
+			User: mustGetEnv("DB_USER"),
+			Pass: mustGetEnv("DB_PASSWORD"),
+			Name: mustGetEnv("DB_NAME"),
 		},
 	}
+}
+
+func (c *Config) GetApiPort() string {
+	return c.AppConfig.ApiPort
+}
+
+func (c *Config) GetDBHost() string {
+	return c.DBConfig.Host
+}
+
+func (c *Config) GetDBPort() string {
+	return c.DBConfig.Port
+}
+
+func (c *Config) GetDBUser() string {
+	return c.DBConfig.User
+}
+
+func (c *Config) GetDBPassword() string {
+	return c.DBConfig.Pass
+}
+
+func (c *Config) GetDBName() string {
+	return c.DBConfig.Name
 }
