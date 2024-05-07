@@ -19,7 +19,7 @@ swag:
 	swag init -g internal/http/router/route.go && swag fmt
 
 run:
-	<absolute-path-to-swag-binary-directory>swag init -g internal/http/router/route.go && <absolute-path-to-swag-binary-directory>swag fmt && docker compose --env-file=.env --verbose up -d --build
+	swag init -g internal/http/router/route.go && swag fmt && docker compose --env-file=.env --verbose up -d --build
 
 
 
