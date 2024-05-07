@@ -10,11 +10,12 @@ import (
 )
 
 func StartServer(config config.Config) {
-	router := router.NewRouter()
+	router := middlewares.LoggerMiddleware(
+		middlewares.SessionMiddleware(
+			router.NewRouter(),
+		),
+	)
 
-	// TODO Wrap handler with middleware (logger, admin etc)
-	logger := middlewares.NewLogger(router)
-
-	log.Printf("Server started on port %s...\n", config.AppConfig.Port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", config.AppConfig.Port), logger))
+	log.Printf("Server started on port %s...\n", config.GetApiPort())
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", config.GetApiPort()), router))
 }

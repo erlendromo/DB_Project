@@ -1,21 +1,34 @@
-# Build stage
-FROM golang:1.22.2 AS BUILDER
+# Builder container
+FROM golang:1.22.2-alpine3.19 AS builder
 
-# Maintainers and authors
+# Labels for the image
 LABEL maintainer="Cloudenberg"
-LABEL authors="Erlend, Arthur, Oskar, Martin"
+LABEL authors="Erlend, Arthur, Martin, Oskar"
+LABEL version="1.0"
+LABEL stage="builder"
 
-# Workdir name for image
+# Set the working directory
 WORKDIR /db_project
 
-# Copy the entire project directory
+# Copy files
 COPY . .
 
 # Compile binary
-RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o executable .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o server .
+
+
+
+# Target container
+FROM scratch
+
+# Root as working directory to copy the binary
+WORKDIR /
+
+# Copy the binary from the builder container
+COPY --from=builder /db_project/server .
 
 # Expose internal port
-EXPOSE 9000
+EXPOSE 8080
 
-# Run executable binary
-ENTRYPOINT ["./executable"]
+# Run the binary
+CMD ["./server"]
