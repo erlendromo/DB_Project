@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS "product_discount" (
 CREATE TABLE IF NOT EXISTS "customer_product_review" (
   "customer_id" INTEGER NOT NULL REFERENCES "customer" ("id"),
   "product_id" INTEGER NOT NULL REFERENCES "product" ("id"),
-  "stars" NUMERIC(2,2) NOT NULL,
+  "stars" NUMERIC(2,1) NOT NULL,
   "comment" VARCHAR(255),
   "deleted" BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY ("customer_id", "product_id")
