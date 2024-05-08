@@ -6,9 +6,21 @@ import (
 	"net/http"
 )
 
+// UnauthorizedError function for logging actual error and returning generic error
+func NewUnauthorizedError(err error) error {
+	if err != nil {
+		log.Printf("unauthorized access: %v", err)
+	}
+
+	return errors.New("unauthorized access")
+}
+
 // InternalServerError function for logging actual error and returning generic error
 func NewInternalServerError(err error) error {
-	log.Printf("internal server error: %v", err)
+	if err != nil {
+		log.Printf("internal server error: %v", err)
+	}
+
 	return errors.New("internal server error")
 }
 
