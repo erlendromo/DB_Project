@@ -11,13 +11,13 @@ CREATE TABLE IF NOT EXISTS "customer" (
 );
 
 CREATE TABLE IF NOT EXISTS "zipcode" (
-  "zip" SMALLINT PRIMARY KEY,
+  "zip" VARCHAR(10) PRIMARY KEY,
   "city" VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "address" (
   "id" SERIAL PRIMARY KEY,
-  "zip" SMALLINT NOT NULL REFERENCES "zipcode" ("zip"),
+  "zipcode" VARCHAR(10) NOT NULL REFERENCES "zipcode" ("zip"),
   "street" VARCHAR(50) NOT NULL,
   "deleted" BOOLEAN NOT NULL DEFAULT FALSE
 );
@@ -120,18 +120,18 @@ CREATE TABLE IF NOT EXISTS "shipping" (
   "delivery_at" TIMESTAMPTZ NOT NULL
 );
 
-INSERT INTO "zipcode" ("zip", "city") VALUES (0010, 'Oslo');
-INSERT INTO "zipcode" ("zip", "city") VALUES (2000, 'Lillestrøm');
-INSERT INTO "zipcode" ("zip", "city") VALUES (2372, 'Brøttum');
-INSERT INTO "zipcode" ("zip", "city") VALUES (3010, 'Drammen');
-INSERT INTO "zipcode" ("zip", "city") VALUES (4010, 'Stavanger');
-INSERT INTO "zipcode" ("zip", "city") VALUES (4609, 'Kardemommeby');
-INSERT INTO "zipcode" ("zip", "city") VALUES (5010, 'Bergen');
-INSERT INTO "zipcode" ("zip", "city") VALUES (6010, 'Ålesund');
-INSERT INTO "zipcode" ("zip", "city") VALUES (7010, 'Trondheim');
-INSERT INTO "zipcode" ("zip", "city") VALUES (8010, 'Bodø');
-INSERT INTO "zipcode" ("zip", "city") VALUES (9010, 'Tromsø');
-INSERT INTO "zipcode" ("zip", "city") VALUES (9170, 'Longyearbyen');
+INSERT INTO "zipcode" ("zip", "city") VALUES ('0010', 'Oslo');
+INSERT INTO "zipcode" ("zip", "city") VALUES ('2000', 'Lillestrøm');
+INSERT INTO "zipcode" ("zip", "city") VALUES ('2372', 'Brøttum');
+INSERT INTO "zipcode" ("zip", "city") VALUES ('3010', 'Drammen');
+INSERT INTO "zipcode" ("zip", "city") VALUES ('4010', 'Stavanger');
+INSERT INTO "zipcode" ("zip", "city") VALUES ('4609', 'Kardemommeby');
+INSERT INTO "zipcode" ("zip", "city") VALUES ('5010', 'Bergen');
+INSERT INTO "zipcode" ("zip", "city") VALUES ('6010', 'Ålesund');
+INSERT INTO "zipcode" ("zip", "city") VALUES ('7010', 'Trondheim');
+INSERT INTO "zipcode" ("zip", "city") VALUES ('8010', 'Bodø');
+INSERT INTO "zipcode" ("zip", "city") VALUES ('9010', 'Tromsø');
+INSERT INTO "zipcode" ("zip", "city") VALUES ('9170', 'Longyearbyen');
 
 INSERT INTO "category" ("name", "description") VALUES ('Computer equipment', 'Computer equipment is the physical components of a computer system');
 INSERT INTO "category" ("name", "description") VALUES ('Gaming', 'Computers, equipment, and accessories designed for gaming');
