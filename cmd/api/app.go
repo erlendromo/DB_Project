@@ -4,6 +4,7 @@ import (
 	"DB_Project/cmd/api/server"
 	"DB_Project/cmd/migrations"
 	"DB_Project/internal/config"
+	"DB_Project/internal/http/dependencies"
 
 	_ "github.com/lib/pq"
 )
@@ -21,6 +22,9 @@ func Run() {
 	migrations.Guard(m.Up())
 	defer migrations.Guard(m.Down())
 	migrations.PingDB(conn)
+
+	// Initialize dependencies
+	dependencies.InitDeps(conn)
 
 	// Start the server
 	server.StartServer(*config)
