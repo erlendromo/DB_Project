@@ -1,8 +1,55 @@
+definitions:
+  utils.ErrorResponse:
+    description: Error Response with message and statuscode
+    properties:
+      message:
+        type: string
+      statuscode:
+        type: integer
+    type: object
 info:
   contact: {}
   description: This is a json RESTful API for the newly established e-commerce Electromart
   termsOfService: http://swagger.io/terms/
   title: Electromart API
   version: "1.0"
-paths: {}
+paths:
+  /electromart/v1/customers:
+    get:
+      description: Get all customers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - AdminAuth: []
+      summary: Get all customers
+      tags:
+      - Customer
+  /electromart/v1/customers/:
+    get:
+      description: Get all customers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - AdminAuth: []
+      summary: Get all customers
+      tags:
+      - Customer
 swagger: "2.0"

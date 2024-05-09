@@ -1,12 +1,20 @@
 package middlewares
 
 import (
+	"DB_Project/internal/utils"
 	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"time"
 )
+
+// Used to validate sessions retrieved by cookies
+var sessions map[string]SessionData
+
+func init() {
+	sessions = make(map[string]SessionData)
+}
 
 // SessionData Session data
 //
@@ -17,11 +25,8 @@ type SessionData struct {
 	UserID    int
 	Username  string
 	LoginTime time.Time
+	Admin     bool
 }
-
-// sessions map
-// Used to validate sessions retrieved by cookies
-var sessions map[string]SessionData
 
 // SetSession Set a session
 //
@@ -31,6 +36,12 @@ var sessions map[string]SessionData
 func SetSession(w http.ResponseWriter, userID int, username string) {
 	sessionID := fmt.Sprintf("session_%d", userID)
 	expiration := time.Now().Add(12 * time.Hour)
+
+	// TODO replace with call to database
+	var a bool
+	if userID == 6969 {
+		a = true
+	}
 
 	cookie := &http.Cookie{
 		Name:    "session",
@@ -44,6 +55,7 @@ func SetSession(w http.ResponseWriter, userID int, username string) {
 		UserID:    userID,
 		Username:  username,
 		LoginTime: time.Now(),
+		Admin:     a,
 	}
 }
 
@@ -55,7 +67,7 @@ func SetSession(w http.ResponseWriter, userID int, username string) {
 func ClearSession(w http.ResponseWriter, r *http.Request) (int, error) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		return http.StatusUnauthorized, err
+		return http.StatusUnauthorized, utils.NewUnauthorizedError(err)
 	}
 
 	delete(sessions, cookie.Value)
@@ -86,11 +98,6 @@ func GetUserFromSession(r *http.Request) (SessionData, int, error) {
 		return SessionData{}, http.StatusUnauthorized, errors.New("invalid session ID")
 	}
 
-	// TODO fix problem with session expiration
-	if cookie.Expires.Before(time.Now()) {
-		return SessionData{}, http.StatusUnauthorized, errors.New("session expired")
-	}
-
 	return sessionData, http.StatusOK, nil
 }
 
@@ -101,11 +108,6 @@ const sessionKey SessionKey = "sessionData"
 
 // SessionMiddleware Middleware to handle sessions
 func SessionMiddleware(next http.Handler) http.Handler {
-	// Initialize the sessions map if it is nil
-	if sessions == nil {
-		sessions = make(map[string]SessionData)
-	}
-
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("session")
 		if err == nil {
