@@ -13,7 +13,7 @@ type ProductDomain interface {
 	GetAllProducts() ([]*Product, error)
 	GetProduct(id string) (*Product, error)
 	PostProduct(product *Product) (int, error)
-	// PatchProduct
-	// search product
-
+	SearchProductFullText(description string) ([]*Product, error)
+	DeleteProduct(id string) error
+	PatchProduct(id string, product *Product) (*Product, error)
 }

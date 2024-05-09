@@ -57,6 +57,10 @@ CREATE TABLE IF NOT EXISTS "product" (
   "stock" INTEGER NOT NULL
 );
 
+CREATE INDEX product_description_idx ON product (description);
+-- full-text search capabilities. This is much more powerful and flexible than pattern-matching (LIKE)
+CREATE INDEX product_description_fts_idx ON product USING gin(to_tsvector('english', description));
+
 CREATE TABLE IF NOT EXISTS "product_discount" (
   "product_id" INTEGER NOT NULL REFERENCES "product" ("id"),
   "discount_id" INTEGER NOT NULL REFERENCES "discount" ("id"),

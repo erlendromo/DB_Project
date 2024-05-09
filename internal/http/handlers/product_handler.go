@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 // GetAllProducts returns a slice of all products in the database
@@ -18,6 +19,26 @@ func GetAllProducts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.JSON(w, http.StatusOK, products)
+}
+
+// GetFullTextSearchProduct gets a slice of products based on a string, compared to product description.
+func GetFullTextSearchProduct(w http.ResponseWriter, r *http.Request) {
+	encodedSearch := r.PathValue("search")
+
+	// decode the search string
+	search, err := url.QueryUnescape(encodedSearch)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	product, err := dependencies.Dependencies.ProductDeps.ProductDomain.SearchProductFullText(search)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	utils.JSON(w, http.StatusOK, product)
 }
 
 // GetProduct gets a single product based on its id
@@ -37,9 +58,6 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 func PostProduct(w http.ResponseWriter, r *http.Request) {
 	var product productdomain.Product
 
-	// Log the start of the function
-	log.Println("Starting PostProduct")
-
 	// Decode the JSON body
 	err := json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
@@ -47,9 +65,6 @@ func PostProduct(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	// Log the product received
-	log.Printf("Decoded product: %+v", product)
 
 	// Call the domain function to post the product
 	id, err := dependencies.Dependencies.ProductDeps.ProductDomain.PostProduct(&product)
@@ -59,15 +74,53 @@ func PostProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Log the ID of the product posted
-	log.Printf("Product posted with ID: %v", id)
-
 	// Set the product ID
 	product.ID = id
 
-	// Log the final product being returned
-	log.Printf("Final product to return: %+v", product)
-
 	// Send the response
 	utils.JSON(w, http.StatusCreated, product)
+}
+
+// PatchProduct updates a product in the database
+func PatchProduct(w http.ResponseWriter, r *http.Request) {
+	var product productdomain.Product
+
+	// Decode the JSON body
+	err := json.NewDecoder(r.Body).Decode(&product)
+	if err != nil {
+		log.Printf("Error decoding product: %v", err) // Log the error
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Get the product ID from the path
+	id := r.PathValue("id")
+
+	// Call the domain function to patch the product
+	newProduct, err := dependencies.Dependencies.ProductDeps.ProductDomain.PatchProduct(id, &product)
+	if err != nil {
+		log.Printf("Error patching product: %v", err) // Log the error
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Send the response
+	utils.JSON(w, http.StatusOK, newProduct)
+}
+
+// DeleteProduct deletes a product from the database
+func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	// Get the product ID from the path
+	id := r.PathValue("id")
+
+	// Call the domain function to delete the product
+	err := dependencies.Dependencies.ProductDeps.ProductDomain.DeleteProduct(id)
+	if err != nil {
+		log.Printf("Error deleting product: %v", err) // Log the error
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Send the response
+	w.WriteHeader(http.StatusNoContent)
 }

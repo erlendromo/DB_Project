@@ -1,11 +1,11 @@
 package router
 
 import (
-	"net/http"
-
 	_ "DB_Project/docs"
 	"DB_Project/internal/http/handlers"
 	"DB_Project/internal/http/middlewares"
+	"log"
+	"net/http"
 
 	swagger "github.com/swaggo/http-swagger/v2"
 )
@@ -33,14 +33,27 @@ func NewRouter() http.Handler {
 	mux.HandleFunc("GET /electromart/v1/customers", middlewares.AdminMiddleware(handlers.AllCustomers))
 	mux.HandleFunc("GET /electromart/v1/customers/", middlewares.AdminMiddleware(handlers.AllCustomers))
 
-	// Product endpoint
+	// Products endpoint
 	mux.HandleFunc("GET /electromart/v1/products", handlers.GetAllProducts)
 	mux.HandleFunc("GET /electromart/v1/products/", handlers.GetAllProducts)
 
-	mux.HandleFunc("GET /electromart/v1/product/{id}", handlers.GetProduct)
+	mux.HandleFunc("GET /electromart/v1/products/{id}", handlers.GetProduct)
 
-	mux.HandleFunc("POST /electromart/v1/product", handlers.PostProduct)
-	mux.HandleFunc("POST /electromart/v1/product/", handlers.PostProduct)
+	// full text search, searches on product description, it is case-insensitive and needs to full word exact word match with any word in a description
+	mux.HandleFunc("GET /electromart/v1/products/full-text-search/{search}", handlers.GetFullTextSearchProduct)
+
+	mux.HandleFunc("POST /electromart/v1/products", handlers.PostProduct)
+	mux.HandleFunc("POST /electromart/v1/products/", handlers.PostProduct)
+
+	mux.HandleFunc("DELETE /electromart/v1/products/{id}", handlers.DeleteProduct)
+
+	mux.HandleFunc("PATCH /electromart/v1/products/{id}", handlers.PatchProduct)
+
+	// UI
+	mux.HandleFunc("/html/product", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("here")
+		http.ServeFile(w, r, "public/html/products.html")
+	})
 
 	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
 	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
