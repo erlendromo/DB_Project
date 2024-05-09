@@ -33,8 +33,14 @@ func NewRouter() http.Handler {
 	mux.HandleFunc("GET /electromart/v1/customers", middlewares.AdminMiddleware(handlers.AllCustomers))
 	mux.HandleFunc("GET /electromart/v1/customers/", middlewares.AdminMiddleware(handlers.AllCustomers))
 
+	// Product endpoint
 	mux.HandleFunc("GET /electromart/v1/products", handlers.GetAllProducts)
 	mux.HandleFunc("GET /electromart/v1/products/", handlers.GetAllProducts)
+
+	mux.HandleFunc("GET /electromart/v1/product/{id}", handlers.GetProduct)
+
+	mux.HandleFunc("POST /electromart/v1/product", handlers.PostProduct)
+	mux.HandleFunc("POST /electromart/v1/product/", handlers.PostProduct)
 
 	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
 	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)

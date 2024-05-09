@@ -11,4 +11,9 @@ type Product struct {
 
 type ProductDomain interface {
 	GetAllProducts() ([]*Product, error)
+	GetProduct(id string) (*Product, error)
+	PostProduct(product *Product) (int, error)
+	// PatchProduct
+	// search product
+
 }
