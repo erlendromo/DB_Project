@@ -2,7 +2,9 @@ package dependencies
 
 import (
 	"DB_Project/internal/business/domains/customeraddressdomain"
+	"DB_Project/internal/business/domains/productdomain"
 	"DB_Project/internal/business/usecases/customeraddressusecase"
+	"DB_Project/internal/business/usecases/productusecase"
 	"database/sql"
 )
 
@@ -10,6 +12,7 @@ var Dependencies Deps
 
 type Deps struct {
 	CustomerDeps *CustomerDeps
+	ProductDeps  *ProductDeps
 }
 
 func GetDeps() *Deps {
@@ -25,6 +28,9 @@ func InitDeps(db *sql.DB) {
 		customeraddressusecase.NewPSQLCustomer(db),
 		customeraddressusecase.NewPSQLAddress(db),
 		customeraddressusecase.NewPSQLCustomerAddress(db),
+	)
+	Dependencies.ProductDeps = newProductDeps(
+		productusecase.NewPSQLProduct(db),
 	)
 }
 
@@ -51,5 +57,15 @@ func newCustomerDeps(cd customeraddressdomain.CustomerDomain, ad customeraddress
 		CustomerDomain:        cd,
 		AddressDomain:         ad,
 		CustomerAddressDomain: cad,
+	}
+}
+
+type ProductDeps struct {
+	ProductDomain productdomain.ProductDomain
+}
+
+func newProductDeps(pd productdomain.ProductDomain) *ProductDeps {
+	return &ProductDeps{
+		ProductDomain: pd,
 	}
 }
