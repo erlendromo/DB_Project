@@ -4,7 +4,6 @@ import (
 	_ "DB_Project/docs"
 	"DB_Project/internal/http/handlers"
 	"DB_Project/internal/http/middlewares"
-	"log"
 	"net/http"
 
 	swagger "github.com/swaggo/http-swagger/v2"
@@ -51,7 +50,6 @@ func NewRouter() http.Handler {
 
 	// UI
 	mux.HandleFunc("/html/product", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("here")
 		http.ServeFile(w, r, "public/html/products.html")
 	})
 
