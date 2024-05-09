@@ -20,13 +20,18 @@ func NewRouter() http.Handler {
 	// TODO setup paths for endpoints
 	mux.Handle("GET /electromart/v1/swagger/*", swagger.Handler(swagger.URL("/electromart/v1/swagger/doc.json")))
 
-	mux.HandleFunc("GET /electromart/v1/customers", middlewares.AdminMiddleware(handlers.AllCustomers))
-	mux.HandleFunc("GET /electromart/v1/customers/", middlewares.AdminMiddleware(handlers.AllCustomers))
-
+	mux.HandleFunc("POST /electromart/v1/signup", handlers.Signup)
+	mux.HandleFunc("POST /electromart/v1/signup/", handlers.Signup)
 	mux.HandleFunc("POST /electromart/v1/login", handlers.Login)
 	mux.HandleFunc("POST /electromart/v1/login/", handlers.Login)
 	mux.HandleFunc("POST /electromart/v1/logout", handlers.Logout)
 	mux.HandleFunc("POST /electromart/v1/logout/", handlers.Logout)
+
+	mux.HandleFunc("GET /electromart/v1/myprofile", handlers.MyProfile)
+	mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.MyProfile)
+
+	mux.HandleFunc("GET /electromart/v1/customers", middlewares.AdminMiddleware(handlers.AllCustomers))
+	mux.HandleFunc("GET /electromart/v1/customers/", middlewares.AdminMiddleware(handlers.AllCustomers))
 
 	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
 	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
