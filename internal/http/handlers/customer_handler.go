@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"DB_Project/internal/business/domains/customeraddressdomain"
+	"DB_Project/internal/http/dependencies"
 	"DB_Project/internal/http/middlewares"
 	"DB_Project/internal/utils"
 	"encoding/json"
@@ -18,7 +20,26 @@ type LoginLogoutResponse struct {
 }
 
 func Signup(w http.ResponseWriter, r *http.Request) {
-	// TODO
+	var signuprequest customeraddressdomain.CreateCustomer
+	if err := json.NewDecoder(r.Body).Decode(&signuprequest); err != nil {
+		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
+		return
+	}
+
+	if err := signuprequest.Validate(); err != nil {
+		utils.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	cd := dependencies.GetDeps().GetCustomerDeps().GetCustomerDomain()
+
+	customer, err := cd.CreateCustomer(r.Context(), &signuprequest)
+	if err != nil {
+		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
+		return
+	}
+
+	utils.JSON(w, http.StatusCreated, customer)
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -56,9 +77,15 @@ func MyProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO get customer from database
-	_ = sessiondata
+	cd := dependencies.GetDeps().GetCustomerDeps().GetCustomerDomain()
 
+	customer, err := cd.GetCustomerByUsername(r.Context(), sessiondata.Username)
+	if err != nil {
+		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
+		return
+	}
+
+	utils.JSON(w, http.StatusOK, customer)
 }
 
 func UpdateMyProfile(w http.ResponseWriter, r *http.Request) {

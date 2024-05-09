@@ -1,15 +1,16 @@
 package customeraddressdomain
 
 import (
+	"context"
 	"errors"
 	"strings"
 )
 
 type CustomerDomain interface {
-	CreateCustomer(customer *CreateCustomer) (*Customer, error)
-	GetCustomerByUsername(username string) (*Customer, error)
-	UpdateCustomer(username string, customer *CreateCustomer) (*Customer, error)
-	SoftDeleteCustomer(username string) error
+	CreateCustomer(ctx context.Context, customer *CreateCustomer) (*Customer, error)
+	GetCustomerByUsername(ctx context.Context, username string) (*Customer, error)
+	UpdateCustomer(ctx context.Context, username string, customer *CreateCustomer) (*Customer, error)
+	SoftDeleteCustomer(ctx context.Context, username string) error
 }
 
 type DBCustomer struct {
