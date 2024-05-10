@@ -219,3 +219,8 @@ INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('DHL', 'D
 INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('UPS', 'United Parcel Service, Inc. is an American multinational package delivery and supply chain management company', 75.00);
 INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('FedEx', 'FedEx Corporation is an American multinational delivery services company', 90.00);
 INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('Bring', 'Bring is a Norwegian postal and logistics company', 60.00);
+
+-- Adding a superuser
+INSERT INTO "customer" ("username", "password", "first_name", "last_name", "email", "phone_number", "role") VALUES ('admin', 'admin', 'Admin', 'Admin', 'admin@admin.admin', '11111111', 1);
+INSERT INTO "address" ("zipcode", "street") VALUES ('0010', 'Admin street 1');
+INSERT INTO "customer_address" ("customer_id", "address_id", "primary_address") VALUES (1, 1, TRUE);

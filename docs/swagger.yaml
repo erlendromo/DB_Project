@@ -1,4 +1,82 @@
 definitions:
+  customeraddressdomain.CreateCustomer:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+      username:
+        type: string
+    type: object
+  customeraddressdomain.CreateCustomerAddressRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+      primary_address:
+        type: boolean
+      street:
+        type: string
+      username:
+        type: string
+      zip_code:
+        type: string
+    type: object
+  customeraddressdomain.DBCustomer:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+      password:
+        type: string
+      phoneNumber:
+        type: string
+      role:
+        type: integer
+      username:
+        type: string
+    type: object
+  customeraddressdomain.DBCustomerAddress:
+    properties:
+      addressID:
+        type: integer
+      customerID:
+        type: integer
+      primaryAddress:
+        type: boolean
+    type: object
+  handlers.LoginLogoutResponse:
+    description: This struct will be used to encode the login/logout response
+    properties:
+      message:
+        type: string
+    type: object
+  handlers.LoginRequest:
+    description: This struct will be used to decode the login request body
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   utils.ErrorResponse:
     description: Error Response with message and statuscode
     properties:
@@ -33,9 +111,52 @@ paths:
       summary: Get all customers
       tags:
       - Customer
-  /electromart/v1/customers/:
-    get:
-      description: Get all customers
+  /electromart/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Log in
+      parameters:
+      - description: Login request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LoginLogoutResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Log in
+      tags:
+      - Login
+  /electromart/v1/logout:
+    post:
+      description: Log out
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LoginLogoutResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Log out
+      tags:
+      - Login
+  /electromart/v1/myprofile:
+    delete:
+      description: Delete my profile
       produces:
       - application/json
       responses:
@@ -48,8 +169,79 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
-      - AdminAuth: []
-      summary: Get all customers
+      - UserAuth: []
+      summary: Delete my profile
+      tags:
+      - Customer
+    get:
+      description: Get my profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/customeraddressdomain.DBCustomer'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - UserAuth: []
+      summary: Get my profile
+      tags:
+      - Customer
+    put:
+      consumes:
+      - application/json
+      description: Update my profile
+      parameters:
+      - description: Update customer
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/customeraddressdomain.CreateCustomer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/customeraddressdomain.DBCustomer'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - UserAuth: []
+      summary: Update my profile
+      tags:
+      - Customer
+  /electromart/v1/signup:
+    post:
+      consumes:
+      - application/json
+      description: Create a new customer
+      parameters:
+      - description: Create customer
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/customeraddressdomain.CreateCustomerAddressRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/customeraddressdomain.DBCustomerAddress'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a new customer
       tags:
       - Customer
 swagger: "2.0"
