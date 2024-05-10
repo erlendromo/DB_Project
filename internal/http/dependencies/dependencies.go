@@ -5,6 +5,7 @@ import (
 	"DB_Project/internal/business/domains/productdomain"
 	"DB_Project/internal/business/usecases/customeraddressusecase"
 	"DB_Project/internal/business/usecases/productusecase"
+	"DB_Project/internal/business/usecases/showcase"
 	"database/sql"
 )
 
@@ -13,6 +14,7 @@ var Dependencies Deps
 type Deps struct {
 	CustomerDeps *CustomerDeps
 	ProductDeps  *ProductDeps
+	ShowcaseDeps *ShowcaseDeps
 }
 
 func GetDeps() *Deps {
@@ -31,6 +33,9 @@ func InitDeps(db *sql.DB) {
 	)
 	Dependencies.ProductDeps = newProductDeps(
 		productusecase.NewPSQLProduct(db),
+	)
+	Dependencies.ShowcaseDeps = newShowcaseDeps(
+		showcase.NewPSQLShowcase(db),
 	)
 }
 
@@ -67,5 +72,15 @@ type ProductDeps struct {
 func newProductDeps(pd productdomain.ProductDomain) *ProductDeps {
 	return &ProductDeps{
 		ProductDomain: pd,
+	}
+}
+
+type ShowcaseDeps struct {
+	ShowcaseDomain showcase.Domain
+}
+
+func newShowcaseDeps(sd showcase.Domain) *ShowcaseDeps {
+	return &ShowcaseDeps{
+		ShowcaseDomain: sd,
 	}
 }

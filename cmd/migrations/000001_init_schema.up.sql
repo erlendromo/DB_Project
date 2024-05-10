@@ -58,7 +58,6 @@ CREATE TABLE IF NOT EXISTS "product" (
 );
 
 CREATE INDEX product_description_idx ON product (description);
--- full-text search capabilities. This is much more powerful and flexible than pattern-matching (LIKE)
 CREATE INDEX product_description_fts_idx ON product USING gin(to_tsvector('english', description));
 
 CREATE TABLE IF NOT EXISTS "product_discount" (
@@ -223,3 +222,102 @@ INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('DHL', 'D
 INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('UPS', 'United Parcel Service, Inc. is an American multinational package delivery and supply chain management company', 75.00);
 INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('FedEx', 'FedEx Corporation is an American multinational delivery services company', 90.00);
 INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('Bring', 'Bring is a Norwegian postal and logistics company', 60.00);
+
+-- Showcase dummy data
+
+INSERT INTO "customer" ("username", "password", "first_name", "last_name", "email", "phone_number", "role") VALUES
+('john_doe', 'password123', 'John', 'Doe', 'john.doe@example.com', '1234567890', 2),
+('jane_smith', 'password456', 'Jane', 'Smith', 'jane.smith@example.com', '0987654321', 2),
+('alice_jones', 'password789', 'Alice', 'Jones', 'alice.jones@example.com', '2345678901', 2),
+('bob_brown', 'password101', 'Bob', 'Brown', 'bob.brown@example.com', '3456789012', 2);
+
+INSERT INTO "address" ("zipcode", "street") VALUES
+('0010', '123 Oslo'),
+('2000', '456 Lillestrøm'),
+('2372', '789 Brøttum'),
+('3010', '101 Drammen');
+
+INSERT INTO "customer_address" ("customer_id", "address_id", "primary_address") VALUES
+(1, 1, TRUE),
+(2, 2, TRUE),
+(3, 3, TRUE),
+(4, 4, TRUE);
+
+INSERT INTO "discount" ("percentage", "description", "start_at", "end_at") VALUES
+(10, 'Winter Sale', '2023-12-01 00:00:00', '2024-01-31 23:59:59'),
+(20, 'Spring Sale', '2024-01-06 00:00:00', '2024-07-31 23:59:59'),
+(15, 'Exclusive Online Sale', '2024-05-01 00:00:00', '2024-05-14 23:59:59'),
+(25, 'End of Season Clearance', '2024-01-06 00:00:00', '2024-07-31 23:59:59');
+
+INSERT INTO "product" ("category_name", "manufacturer_name", "description", "price", "stock") VALUES
+('PC & Tablets', 'Apple', 'Apple MacBook Air 13"', 999.00, 15),
+('Phones & Watches', 'Apple', 'Apple iPhone 13', 799.00, 20),
+('Computer equipment', 'Dell', 'Dell XPS 15 Laptop', 1200.00, 10);
+
+
+-- Linking products to discounts
+INSERT INTO "product_discount" ("product_id", "discount_id") VALUES
+(1, 1),
+(2, 2),
+(1, 3),
+(2, 4),
+(3, 5),
+(4, 6),
+(5, 7),
+(6, 8),
+(7, 6),
+(8, 6),
+(9, 6),
+(10, 8);
+
+
+-- Insert payment methods
+INSERT INTO "payment_method" ("method", "description", "fee") VALUES
+('Debit Card', 'Payments directly from a bank account', 0.00),
+('Credit Card', 'Standard credit card payment', 0.00),
+('Apple Pay', 'Pay using Apple Pay with your Apple devices', 2.00),
+('Google Pay', 'Pay using Google Pay with your Android devices', 2.00),
+('PayPal', 'Pay via PayPal', 5.00);
+
+
+-- Varied orders with simple and realistic scenarios
+INSERT INTO "shopping_order" ("customer_id", "placed_at", "total_amount", "status") VALUES
+(1, '2024-05-01 09:30:00', 4500.00, 'Completed'),
+(2, '2024-05-02 15:45:00', 1250.00, 'Shipped'),
+(1, '2024-05-03 14:20:00', 2300.00, 'Cancelled'),
+(2, '2024-05-04 16:00:00', 850.00, 'Processing'),
+(2, '2024-05-05 17:00:00', 2990.00, 'Pending');
+
+
+-- Items for the orders, each matching an order ID
+INSERT INTO "item" ("shopping_order_id", "product_id", "quantity", "sub_total") VALUES
+(1, 1, 1, 4500.00),
+(2, 2, 1, 1250.00),
+(3, 3, 2, 2000.00),
+(4, 4, 1, 850.00),
+(5, 5, 2, 2990.00);
+
+
+-- Payments for the orders, one payment method per order
+INSERT INTO "payment" ("shopping_order_id", "payment_method_id", "status") VALUES
+(1, 1, 'Completed'),
+(2, 2, 'Completed'),
+(3, 3, 'Cancelled'),
+(4, 4, 'Processing'),
+(5, 5, 'Pending');
+
+-- Insert reviews for products id 1 to 10
+INSERT INTO "customer_product_review" ("customer_id", "product_id", "stars", "comment", "deleted") VALUES
+(1, 1, 5, 'Excellent product!', FALSE),
+(2, 1, 4, 'Really good but a bit pricey.', FALSE),
+(1, 2, 3, 'Average performance, not what I expected.', FALSE),
+(3, 2, 4, 'Good product, fast shipping.', FALSE),
+(2, 3, 2, 'Not satisfied with the quality.', FALSE),
+(4, 3, 5, 'Top notch product. Highly recommend!', FALSE),
+(1, 4, 4.5, 'Great features but a little complex to use.', FALSE),
+(3, 5, 3, 'Okayish, expected better.', FALSE),
+(2, 6, 5, 'Best purchase ever!', FALSE),
+(4, 7, 4, 'Pretty decent for the price.', FALSE),
+(1, 8, 4, 'Meets expectations, nothing more.', FALSE),
+(3, 9, 5, 'Fantastic buy!', FALSE),
+(4, 10, 4, 'Good value for the money.', FALSE);

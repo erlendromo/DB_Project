@@ -53,6 +53,16 @@ func NewRouter() http.Handler {
 		http.ServeFile(w, r, "public/html/products.html")
 	})
 
+	// showcase handler - the queries we showcase in the report
+
+	mux.HandleFunc("GET /electromart/v1/orders-details/{orderId}", handlers.OrderWithDetails)
+
+	mux.HandleFunc("GET /electromart/v1/discounted-products", handlers.CurrentDiscountedProducts)
+
+	mux.HandleFunc("GET /electromart/v1/sales-per-product", handlers.TotalSalesPerProduct)
+
+	mux.HandleFunc("GET /electromart/v1/top-customers", handlers.TopCustomers)
+
 	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
 	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
 
