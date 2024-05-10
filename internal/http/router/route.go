@@ -29,12 +29,13 @@ func NewRouter() http.Handler {
 
 	mux.HandleFunc("GET /electromart/v1/myprofile", handlers.MyProfile)
 	mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.MyProfile)
+	mux.HandleFunc("PUT /electromart/v1/myprofile", handlers.UpdateMyProfile)
+	mux.HandleFunc("PUT /electromart/v1/myprofile/", handlers.UpdateMyProfile)
+	mux.HandleFunc("DELETE /electromart/v1/myprofile", handlers.DeleteMyProfile)
+	mux.HandleFunc("DELETE /electromart/v1/myprofile/", handlers.DeleteMyProfile)
 
 	mux.HandleFunc("GET /electromart/v1/customers", middlewares.AdminMiddleware(handlers.AllCustomers))
 	mux.HandleFunc("GET /electromart/v1/customers/", middlewares.AdminMiddleware(handlers.AllCustomers))
-
-	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
-	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
 
 	return mux
 }
