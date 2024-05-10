@@ -6,34 +6,36 @@ import (
 	"DB_Project/internal/http/middlewares"
 	"DB_Project/internal/utils"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
-type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type LoginLogoutResponse struct {
-	Message string `json:"message"`
-}
-
+// Signup Create a new customer
+//
+//	@title			Signup
+//	@summary		Create a new customer
+//	@description	Create a new customer
+//	@tags			Customer
+//	@accept			json
+//	@produce		json
+//	@param			body	body		customeraddressdomain.CreateCustomerAddressRequest	true	"Create customer"
+//	@success		201		{object}	customeraddressdomain.DBCustomerAddress
+//	@failure		422		{object}	utils.ErrorResponse
+//	@router			/electromart/v1/signup [post]
 func Signup(w http.ResponseWriter, r *http.Request) {
-	var signuprequest customeraddressdomain.CreateCustomer
+	var signuprequest customeraddressdomain.CreateCustomerAddressRequest
 	if err := json.NewDecoder(r.Body).Decode(&signuprequest); err != nil {
 		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
 		return
 	}
 
-	if err := signuprequest.Validate(); err != nil {
-		utils.ERROR(w, http.StatusUnprocessableEntity, err)
+	if errs := signuprequest.Validate(); len(errs) > 0 {
+		utils.JSON(w, http.StatusUnprocessableEntity, utils.NewValidateErrors(errs))
 		return
 	}
 
-	cd := dependencies.GetDeps().GetCustomerDeps().GetCustomerDomain()
+	cd := dependencies.Dependencies.CustomerAddressDeps.PSQLCustomerAddress
 
-	customer, err := cd.CreateCustomer(r.Context(), &signuprequest)
+	customer, err := cd.CreateCustomerAddress(r.Context(), &signuprequest)
 	if err != nil {
 		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
 		return
@@ -42,34 +44,17 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	utils.JSON(w, http.StatusCreated, customer)
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
-	var loginRequest LoginRequest
-	err := json.NewDecoder(r.Body).Decode(&loginRequest)
-	if err != nil {
-		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
-		return
-	}
-
-	middlewares.SetSession(w, 6969, loginRequest.Username)
-
-	utils.JSON(w, http.StatusOK, LoginLogoutResponse{
-		Message: fmt.Sprintf("You are logged in as %s!", loginRequest.Username),
-	})
-
-}
-
-func Logout(w http.ResponseWriter, r *http.Request) {
-	statuscode, err := middlewares.ClearSession(w, r)
-	if err != nil {
-		utils.ERROR(w, statuscode, err)
-		return
-	}
-
-	utils.JSON(w, http.StatusOK, LoginLogoutResponse{
-		Message: "You are logged out!",
-	})
-}
-
+// MyProfile Get my profile
+//
+//	@title			MyProfile
+//	@summary		Get my profile
+//	@description	Get my profile
+//	@tags			Customer
+//	@security		UserAuth
+//	@produce		json
+//	@success		200	{object}	customeraddressdomain.DBCustomer
+//	@failure		401	{object}	utils.ErrorResponse
+//	@router			/electromart/v1/myprofile [get]
 func MyProfile(w http.ResponseWriter, r *http.Request) {
 	sessiondata, statuscode, err := middlewares.GetUserFromSession(r)
 	if err != nil {
@@ -77,9 +62,9 @@ func MyProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cd := dependencies.GetDeps().GetCustomerDeps().GetCustomerDomain()
+	cd := dependencies.Dependencies.PSQLCustomerAddress
 
-	customer, err := cd.GetCustomerByUsername(r.Context(), sessiondata.Username)
+	customer, err := cd.GetCustomerAddressesByCustomerID(r.Context(), sessiondata.ID)
 	if err != nil {
 		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
 		return
@@ -88,6 +73,19 @@ func MyProfile(w http.ResponseWriter, r *http.Request) {
 	utils.JSON(w, http.StatusOK, customer)
 }
 
+// UpdateMyProfile Update my profile
+//
+//	@title			UpdateMyProfile
+//	@summary		Update my profile
+//	@description	Update my profile
+//	@tags			Customer
+//	@security		UserAuth
+//	@accept			json
+//	@produce		json
+//	@param			body	body		customeraddressdomain.CreateCustomer	true	"Update customer"
+//	@success		200		{object}	customeraddressdomain.DBCustomer
+//	@failure		401		{object}	utils.ErrorResponse
+//	@router			/electromart/v1/myprofile [put]
 func UpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 	sessiondata, statuscode, err := middlewares.GetUserFromSession(r)
 	if err != nil {
@@ -95,10 +93,47 @@ func UpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO get customer from database
-	_ = sessiondata
+	var updatecustomer customeraddressdomain.CreateCustomerAddressRequest
+	if err := json.NewDecoder(r.Body).Decode(&updatecustomer); err != nil {
+		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
+		return
+	}
+
+	if errs := updatecustomer.Validate(); len(errs) > 0 {
+		utils.JSON(w, http.StatusUnprocessableEntity, utils.NewValidateErrors(errs))
+		return
+	}
+
+	// TODO fix this (is scuffed atm)
+
+	cd := dependencies.Dependencies.PSQLCustomer
+
+	if err = cd.UpdateCustomer(r.Context(), sessiondata.ID, &customeraddressdomain.CreateCustomer{
+		Username:    updatecustomer.Username,
+		Password:    updatecustomer.Password,
+		FirstName:   updatecustomer.FirstName,
+		LastName:    updatecustomer.LastName,
+		Email:       updatecustomer.Email,
+		PhoneNumber: updatecustomer.PhoneNumber,
+	}); err != nil {
+		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
+		return
+	}
+
+	utils.JSON(w, http.StatusOK, updatecustomer)
 }
 
+// DeleteMyProfile Delete my profile
+//
+//	@title			DeleteMyProfile
+//	@summary		Delete my profile
+//	@description	Delete my profile
+//	@tags			Customer
+//	@security		UserAuth
+//	@produce		json
+//	@success		200	{json}		message
+//	@failure		401	{object}	utils.ErrorResponse
+//	@router			/electromart/v1/myprofile [delete]
 func DeleteMyProfile(w http.ResponseWriter, r *http.Request) {
 	sessiondata, statuscode, err := middlewares.GetUserFromSession(r)
 	if err != nil {
@@ -106,12 +141,19 @@ func DeleteMyProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO get customer from database
-	_ = sessiondata
+	cd := dependencies.Dependencies.PSQLCustomer
+
+	if err = cd.SoftDeleteCustomer(r.Context(), sessiondata.ID); err != nil {
+		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
+		return
+	}
+
+	utils.JSON(w, http.StatusNoContent, "")
 }
 
 // AllCustomers Get all customers
 //
+//	@title			AllCustomers
 //	@summary		Get all customers
 //	@description	Get all customers
 //	@tags			Customer
@@ -120,13 +162,12 @@ func DeleteMyProfile(w http.ResponseWriter, r *http.Request) {
 //	@success		200	{json}		message
 //	@failure		401	{object}	utils.ErrorResponse
 //	@router			/electromart/v1/customers [get]
-//	@router			/electromart/v1/customers/ [get]
 func AllCustomers(w http.ResponseWriter, r *http.Request) {
-	resp := struct {
-		Message string `json:"message"`
-	}{
-		Message: "You are authorized!",
+	customersAddresses, err := dependencies.Dependencies.PSQLCustomerAddress.AllCustomersAddresses(r.Context())
+	if err != nil {
+		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
+		return
 	}
 
-	utils.JSON(w, http.StatusOK, resp)
+	utils.JSON(w, http.StatusOK, customersAddresses)
 }

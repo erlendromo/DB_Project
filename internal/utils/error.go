@@ -6,6 +6,26 @@ import (
 	"net/http"
 )
 
+// Validate errors
+type ValidateErrors struct {
+	Errors []struct {
+		Error string `json:"error"`
+	} `json:"errors"`
+}
+
+// NewValidateErrors function for creating new ValidateErrors
+func NewValidateErrors(errs map[string]error) *ValidateErrors {
+	ve := &ValidateErrors{}
+
+	for _, err := range errs {
+		ve.Errors = append(ve.Errors, struct {
+			Error string `json:"error"`
+		}{Error: err.Error()})
+	}
+
+	return ve
+}
+
 // UnauthorizedError function for logging actual error and returning generic error
 func NewUnauthorizedError(err error) error {
 	if err != nil {
