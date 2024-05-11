@@ -19,23 +19,26 @@ func NewRouter() http.Handler {
 	// Swagger endpoint (here a client can test the different endpoints and see expected results)
 	mux.Handle("GET /electromart/v1/swagger/*", swagger.Handler(swagger.URL("/electromart/v1/swagger/doc.json")))
 
+	// Login, Logout endpoints
+	mux.HandleFunc("POST /electromart/v1/login", handlers.Login)
+	mux.HandleFunc("POST /electromart/v1/login/", handlers.Login)
+	mux.HandleFunc("POST /electromart/v1/logout", handlers.Logout)
+	mux.HandleFunc("POST /electromart/v1/logout/", handlers.Logout)
+
+	// Me endpoint
+	mux.HandleFunc("POST /electromart/v1/signup", handlers.Signup)
+	mux.HandleFunc("POST /electromart/v1/signup/", handlers.Signup)
+
+	mux.HandleFunc("GET /electromart/v1/me", handlers.MyProfile)
+	mux.HandleFunc("GET /electromart/v1/me/", handlers.MyProfile)
+	mux.HandleFunc("PATCH /electromart/v1/me", handlers.UpdateMyProfile)
+	mux.HandleFunc("PATCH /electromart/v1/me/", handlers.UpdateMyProfile)
+	mux.HandleFunc("DELETE /electromart/v1/me", handlers.DeleteMyProfile)
+	mux.HandleFunc("DELETE /electromart/v1/me/", handlers.DeleteMyProfile)
+
 	// Customers endpoints
 	mux.HandleFunc("GET /electromart/v1/customers", middlewares.AdminMiddleware(handlers.AllCustomers))
 	mux.HandleFunc("GET /electromart/v1/customers/", middlewares.AdminMiddleware(handlers.AllCustomers))
-
-	mux.HandleFunc("POST /electromart/v1/customers/signup", handlers.Signup)
-	mux.HandleFunc("POST /electromart/v1/customers/signup/", handlers.Signup)
-	mux.HandleFunc("POST /electromart/v1/customers/login", handlers.Login)
-	mux.HandleFunc("POST /electromart/v1/customers/login/", handlers.Login)
-	mux.HandleFunc("POST /electromart/v1/customers/logout", handlers.Logout)
-	mux.HandleFunc("POST /electromart/v1/customers/logout/", handlers.Logout)
-
-	mux.HandleFunc("GET /electromart/v1/customers/me", handlers.MyProfile)
-	mux.HandleFunc("GET /electromart/v1/customers/me/", handlers.MyProfile)
-	mux.HandleFunc("PATCH /electromart/v1/customers/me", handlers.UpdateMyProfile)
-	mux.HandleFunc("PATCH /electromart/v1/customers/me/", handlers.UpdateMyProfile)
-	mux.HandleFunc("DELETE /electromart/v1/customers/me", handlers.DeleteMyProfile)
-	mux.HandleFunc("DELETE /electromart/v1/customers/me/", handlers.DeleteMyProfile)
 
 	mux.HandleFunc("GET /electromart/v1/customers/top/{limit}", middlewares.AdminMiddleware(handlers.TopCustomers))
 
@@ -64,8 +67,8 @@ func NewRouter() http.Handler {
 	mux.HandleFunc("DELETE /electromart/v1/products/{id}", middlewares.AdminMiddleware(handlers.DeleteProduct))
 	mux.HandleFunc("DELETE /electromart/v1/products/{id}/", middlewares.AdminMiddleware(handlers.DeleteProduct))
 
-	mux.HandleFunc("GET /electromart/v1/products/sales", handlers.TotalSalesPerProduct)
-	mux.HandleFunc("GET /electromart/v1/products/sales/", handlers.TotalSalesPerProduct)
+	mux.HandleFunc("GET /electromart/v1/products/sales-per-product", handlers.TotalSalesPerProduct)
+	mux.HandleFunc("GET /electromart/v1/products/sales-per-product/", handlers.TotalSalesPerProduct)
 	mux.HandleFunc("GET /electromart/v1/products/discounts", handlers.CurrentDiscountedProducts)
 	mux.HandleFunc("GET /electromart/v1/products/discounts/", handlers.CurrentDiscountedProducts)
 	mux.HandleFunc("GET /electromart/v1/products/full-text-search/{search}", handlers.GetFullTextSearchProduct)
@@ -82,9 +85,13 @@ func NewRouter() http.Handler {
 	mux.HandleFunc("POST /electromart/v1/checkout/", handlers.CreateOrder)
 
 	// Orders endpoint
+	mux.HandleFunc("GET /electromart/v1/orders", handlers.GetShoppingOrders)
+	mux.HandleFunc("GET /electromart/v1/orders/", handlers.GetShoppingOrders)
+	mux.HandleFunc("GET /electromart/v1/orders/{orderID}", handlers.GetShoppingOrderByID)
+	mux.HandleFunc("GET /electromart/v1/orders/{orderID}/", handlers.GetShoppingOrderByID)
 
-	mux.HandleFunc("GET /electromart/v1/orders/{orderId}/details", middlewares.AdminMiddleware(handlers.OrderWithDetails))
-	mux.HandleFunc("GET /electromart/v1/orders/{orderId}/details/", middlewares.AdminMiddleware(handlers.OrderWithDetails))
+	mux.HandleFunc("GET /electromart/v1/orders/{orderID}/details", middlewares.AdminMiddleware(handlers.OrderWithDetails))
+	mux.HandleFunc("GET /electromart/v1/orders/{orderID}/details/", middlewares.AdminMiddleware(handlers.OrderWithDetails))
 
 	return mux
 }

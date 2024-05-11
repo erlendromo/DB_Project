@@ -39,14 +39,14 @@ func TopCustomers(w http.ResponseWriter, r *http.Request) {
 //	@tags			Showcase
 //	@security		AdminAuth
 //	@produce		json
-//	@param			orderId	path		string	true	"Order ID"
+//	@param			orderID	path		string	true	"Order ID"
 //	@success		200		{object}	showcasedomain.OrderDetail
 //	@failure		401		{object}	utils.ErrorResponse
 //	@failure		500		{object}	utils.ErrorResponse
-//	@router			/electromart/v1/orders/{orderId}/details [get]
+//	@router			/electromart/v1/orders/{orderID}/details [get]
 func OrderWithDetails(w http.ResponseWriter, r *http.Request) {
 
-	orderId := r.PathValue("orderId")
+	orderId := r.PathValue("orderID")
 
 	orderDetails, err := dependencies.Dependencies.ShowcaseDeps.PSQLShowcase.FetchOrderWithDetails(orderId)
 	if err != nil {
@@ -86,7 +86,7 @@ func CurrentDiscountedProducts(w http.ResponseWriter, r *http.Request) {
 //	@produce		json
 //	@success		200	{array}		showcasedomain.ProductSales
 //	@failure		500	{object}	utils.ErrorResponse
-//	@router			/electromart/v1/products/sales [get]
+//	@router			/electromart/v1/products/sales-per-product [get]
 func TotalSalesPerProduct(w http.ResponseWriter, r *http.Request) {
 	sales, err := dependencies.Dependencies.ShowcaseDeps.PSQLShowcase.CalculateTotalSalesPerProduct()
 	if err != nil {

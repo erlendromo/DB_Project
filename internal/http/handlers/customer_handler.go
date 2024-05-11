@@ -21,7 +21,7 @@ import (
 //	@success		201		{object}	customeraddressdomain.DBCustomerAddress
 //	@failure		422		{object}	utils.ErrorResponse
 //	@failure		500		{object}	utils.ErrorResponse
-//	@router			/electromart/v1/customers/signup [post]
+//	@router			/electromart/v1/signup [post]
 func Signup(w http.ResponseWriter, r *http.Request) {
 	var signuprequest customeraddressdomain.CreateCustomerAddressRequest
 	if err := json.NewDecoder(r.Body).Decode(&signuprequest); err != nil {
