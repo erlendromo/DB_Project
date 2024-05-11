@@ -12,7 +12,7 @@ import (
 
 // GetAllProducts returns a slice of all products in the database
 func GetAllProducts(w http.ResponseWriter, r *http.Request) {
-	products, err := dependencies.Dependencies.ProductDeps.ProductDomain.GetAllProducts()
+	products, err := dependencies.Dependencies.ProductDeps.PSQLProduct.GetAllProducts()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -32,7 +32,7 @@ func GetFullTextSearchProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product, err := dependencies.Dependencies.ProductDeps.ProductDomain.SearchProductFullText(search)
+	product, err := dependencies.Dependencies.ProductDeps.PSQLProduct.SearchProductFullText(search)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -45,7 +45,7 @@ func GetFullTextSearchProduct(w http.ResponseWriter, r *http.Request) {
 func GetProduct(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	product, err := dependencies.Dependencies.ProductDeps.ProductDomain.GetProduct(id)
+	product, err := dependencies.Dependencies.ProductDeps.PSQLProduct.GetProduct(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -67,7 +67,7 @@ func PostProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call the domain function to post the product
-	id, err := dependencies.Dependencies.ProductDeps.ProductDomain.PostProduct(&product)
+	id, err := dependencies.Dependencies.ProductDeps.PSQLProduct.PostProduct(&product)
 	if err != nil {
 		log.Printf("Error posting product: %v", err) // Log the error
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -97,7 +97,7 @@ func PatchProduct(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
 	// Call the domain function to patch the product
-	newProduct, err := dependencies.Dependencies.ProductDeps.ProductDomain.PatchProduct(id, &product)
+	newProduct, err := dependencies.Dependencies.ProductDeps.PSQLProduct.PatchProduct(id, &product)
 	if err != nil {
 		log.Printf("Error patching product: %v", err) // Log the error
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -114,7 +114,7 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
 	// Call the domain function to delete the product
-	err := dependencies.Dependencies.ProductDeps.ProductDomain.DeleteProduct(id)
+	err := dependencies.Dependencies.ProductDeps.PSQLProduct.DeleteProduct(id)
 	if err != nil {
 		log.Printf("Error deleting product: %v", err) // Log the error
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -4,6 +4,13 @@ import (
 	"time"
 )
 
+type ShowcaseDomain interface {
+	CalculateTotalSalesPerProduct() ([]*ProductSales, error)
+	ListCurrentDiscountedProducts() ([]*DiscountedProduct, error)
+	FetchOrderWithDetails(orderId string) (*OrderDetail, error)
+	IdentifyTopCustomers(limit string) ([]*TopCustomer, error)
+}
+
 type ProductSales struct {
 	ProductID   int
 	Description string
