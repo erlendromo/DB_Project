@@ -18,7 +18,7 @@ import (
 //	@success		200		{array}		showcasedomain.TopCustomer
 //	@failure		401		{object}	utils.ErrorResponse
 //	@failure		500		{object}	utils.ErrorResponse
-//	@router			/electromart/v1/top-customers/{limit} [get]
+//	@router			/electromart/v1/customers/top/{limit} [get]
 func TopCustomers(w http.ResponseWriter, r *http.Request) {
 	limit := r.PathValue("limit")
 
@@ -43,7 +43,7 @@ func TopCustomers(w http.ResponseWriter, r *http.Request) {
 //	@success		200		{object}	showcasedomain.OrderDetail
 //	@failure		401		{object}	utils.ErrorResponse
 //	@failure		500		{object}	utils.ErrorResponse
-//	@router			/electromart/v1/orders-details/{orderId} [get]
+//	@router			/electromart/v1/orders/{orderId}/details [get]
 func OrderWithDetails(w http.ResponseWriter, r *http.Request) {
 
 	orderId := r.PathValue("orderId")
@@ -66,7 +66,7 @@ func OrderWithDetails(w http.ResponseWriter, r *http.Request) {
 //	@produce		json
 //	@success		200	{array}		showcasedomain.DiscountedProduct
 //	@failure		500	{object}	utils.ErrorResponse
-//	@router			/electromart/v1/discounted-products [get]
+//	@router			/electromart/v1/products/discounts [get]
 func CurrentDiscountedProducts(w http.ResponseWriter, r *http.Request) {
 	discountedProducts, err := dependencies.Dependencies.ShowcaseDeps.PSQLShowcase.ListCurrentDiscountedProducts()
 	if err != nil {
@@ -86,7 +86,7 @@ func CurrentDiscountedProducts(w http.ResponseWriter, r *http.Request) {
 //	@produce		json
 //	@success		200	{array}		showcasedomain.ProductSales
 //	@failure		500	{object}	utils.ErrorResponse
-//	@router			/electromart/v1/sales-per-product [get]
+//	@router			/electromart/v1/products/sales [get]
 func TotalSalesPerProduct(w http.ResponseWriter, r *http.Request) {
 	sales, err := dependencies.Dependencies.ShowcaseDeps.PSQLShowcase.CalculateTotalSalesPerProduct()
 	if err != nil {

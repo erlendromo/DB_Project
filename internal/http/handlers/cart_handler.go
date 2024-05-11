@@ -33,12 +33,12 @@ func AddToCart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quantity := r.URL.Query()["quantity"]
-	if quantity == nil {
+	quantity := r.URL.Query().Get("quantity")
+	if len(quantity) == 0 {
 		Cart[productIDInt] = 1
 	}
 
-	quantityInt, err := strconv.Atoi(quantity[0])
+	quantityInt, err := strconv.Atoi(quantity)
 	if err != nil {
 		utils.ERROR(w, http.StatusBadRequest, err)
 		return
