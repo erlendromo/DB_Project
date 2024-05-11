@@ -23,15 +23,13 @@ func Run() {
 
 	// Run migrations and ping the database
 	migrations.Guard(m.Up())
-	// defer migrations.Guard(m.Down())
+	migrations.PingDB(conn)
 
 	defer func(migrate *migrate.Migrate) {
 		if r := recover(); r != nil {
 			migrations.Guard(migrate.Down())
 		}
 	}(m)
-
-	migrations.PingDB(conn)
 
 	// Initialize dependencies
 	dependencies.InitDeps(conn)

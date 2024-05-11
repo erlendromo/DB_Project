@@ -16,19 +16,28 @@ import (
 func NewRouter() http.Handler {
 	mux := http.NewServeMux()
 
-	// TODO setup paths for endpoints
+  // Swagger endpoint (here a client can test the different endpoints and see expected results)
 	mux.Handle("GET /electromart/v1/swagger/*", swagger.Handler(swagger.URL("/electromart/v1/swagger/doc.json")))
 
+  // Signup endpoint
 	mux.HandleFunc("POST /electromart/v1/signup", handlers.Signup)
 	mux.HandleFunc("POST /electromart/v1/signup/", handlers.Signup)
+  
+  // Login and Logout endpoints
 	mux.HandleFunc("POST /electromart/v1/login", handlers.Login)
 	mux.HandleFunc("POST /electromart/v1/login/", handlers.Login)
 	mux.HandleFunc("POST /electromart/v1/logout", handlers.Logout)
 	mux.HandleFunc("POST /electromart/v1/logout/", handlers.Logout)
 
+  // MyProfile endpoint (requires login)
 	mux.HandleFunc("GET /electromart/v1/myprofile", handlers.MyProfile)
 	mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.MyProfile)
+	mux.HandleFunc("PUT /electromart/v1/myprofile", handlers.UpdateMyProfile)
+	mux.HandleFunc("PUT /electromart/v1/myprofile/", handlers.UpdateMyProfile)
+	mux.HandleFunc("DELETE /electromart/v1/myprofile", handlers.DeleteMyProfile)
+	mux.HandleFunc("DELETE /electromart/v1/myprofile/", handlers.DeleteMyProfile)
 
+  // Customers endpoint (admin only)
 	mux.HandleFunc("GET /electromart/v1/customers", middlewares.AdminMiddleware(handlers.AllCustomers))
 	mux.HandleFunc("GET /electromart/v1/customers/", middlewares.AdminMiddleware(handlers.AllCustomers))
 
@@ -62,9 +71,6 @@ func NewRouter() http.Handler {
 	mux.HandleFunc("GET /electromart/v1/sales-per-product", handlers.TotalSalesPerProduct)
 
 	mux.HandleFunc("GET /electromart/v1/top-customers/{limit}", handlers.TopCustomers)
-
-	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
-	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
 
 	return mux
 }
