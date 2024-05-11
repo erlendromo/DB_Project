@@ -83,7 +83,7 @@ func PostProduct(w http.ResponseWriter, r *http.Request) {
 
 // PatchProduct updates a product in the database
 func PatchProduct(w http.ResponseWriter, r *http.Request) {
-	var product productdomain.Product
+	var product productdomain.PointerProduct
 
 	// Decode the JSON body
 	err := json.NewDecoder(r.Body).Decode(&product)

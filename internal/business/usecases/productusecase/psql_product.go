@@ -100,7 +100,7 @@ func (psql *PSQLProduct) SearchProductFullText(description string) ([]*productdo
 	return products, nil
 }
 
-func (psql *PSQLProduct) PatchProduct(id string, product *productdomain.Product) (*productdomain.Product, error) {
+func (psql *PSQLProduct) PatchProduct(id string, product *productdomain.PointerProduct) (*productdomain.Product, error) {
 	query := `
 		UPDATE product 
 		SET category_name = COALESCE($1, category_name), 
