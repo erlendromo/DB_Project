@@ -28,12 +28,19 @@
             padding: 10px;
             box-sizing: border-box;
         }
+        p {
+            margin-bottom: 0;
+            margin-top: 0;
+        }
         pre {
             background-color: #f4f4f4;
             border: 1px solid #ddd;
             padding: 10px;
             overflow: auto;
             font-family: 'Courier New', Courier, monospace;
+        }
+        #logout {
+            display: none; /* hide logout button initially */
         }
     </style>
 </head>
@@ -74,7 +81,7 @@
         <section>
             <h2>Functionality Admins Can Do</h2>
             <!-- Post Product -->
-            <p>All input fields must have some text, Category and Manufacturer must match existing entities</p>
+            <p>All fields must be populated, Category and Manufacturer must match existing entities</p>
             <input type="text" id="newProductDescription" placeholder="Product Description">
             <input type="number" id="newProductPrice" placeholder="Price">
             <input type="number" id="newProductStock" placeholder="Stock">
@@ -85,6 +92,7 @@
             <br>
             <br>
             <!-- Patch Product -->
+            <p>Only fields populated will be affected</p>
             <input type="text" id="patchProductDescription" placeholder="New Description">
             <input type="number" id="patchProductPrice" placeholder="New Price">
             <input type="number" id="patchProductStock" placeholder="New Stock">
@@ -95,6 +103,7 @@
             <br>
             <br>
             <!-- Delete Product -->
+            <p>You cannot delete products associated with discounts or other orders</p>
             <input type="text" id="deleteProductId" placeholder="Product ID">
             <button id="deleteProduct">Delete Product</button>
             <div id="deleteProductResult"></div>
@@ -119,7 +128,7 @@
         <button id="logout">Logout</button>
 
         <!-- Display the current user role and username -->
-        <div>Logged in as: <span id="role">Role</span> - <span id="username">Username</span></div>
+        <div>Logged in as: <span id="username">Not logged in</span></div>
 
         <h2>Results</h2>
         <pre id="dataDisplay"></pre>
@@ -246,57 +255,56 @@
                 }
             });
         });
-    });
 
+        // Handle login
+        $('#loginForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
 
-    // Handle login
-    $('#loginForm').on('submit', function(e) {
-        e.preventDefault(); // Prevent default form submission
+            var username = $('#loginUsername').val();
+            var password = $('#loginPassword').val();
+            var loginData = {
+                username: username,
+                password: password
+            };
 
-        var username = $('#loginUsername').val();
-        var password = $('#loginPassword').val();
-        var loginData = {
-            username: username,
-            password: password
-        };
+            $.ajax({
+                url: '/electromart/v1/login',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(loginData),
+                success: function(data, textStatus, jqXHR) {
+                    console.log("Logged in successfully:", data);
+                    $('#dataDisplay').html("Logged in successfully!");
+                    $('#username').text(username); // Display the logged in username
+                    $('#loginForm').hide(); // Hide the login form
+                    $('#logout').show(); // Show the logout button
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Login failed:", textStatus, errorThrown);
+                    $('#dataDisplay').html("Login failed: " + textStatus);
+                }
+            });
+        });
 
-        $.ajax({
-            url: '/electromart/v1/login',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(loginData),
-            success: function(data, textStatus, jqXHR) {
-                console.log("Logged in successfully:", data);
-                // Here you might set cookies or update UI with session info
-                $('#dataDisplay').html("Logged in successfully!");
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.error("Login failed:", textStatus, errorThrown);
-                $('#dataDisplay').html("Login failed: " + textStatus);
-            }
+        // Handle logout
+        $('#logout').click(function() {
+            $.ajax({
+                url: '/electromart/v1/logout',
+                type: 'POST',
+                success: function(data) {
+                    console.log("Logged out successfully:", data);
+                    $('#dataDisplay').html("Logged out successfully!");
+                    $('#username').text("Not logged in"); // Reset the username display
+                    $('#logout').hide(); // Hide the logout button
+                    $('#loginForm').show(); // Show the login form
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Logout failed:", textStatus, errorThrown);
+                    $('#dataDisplay').html("Logout failed: " + textStatus);
+                }
+            });
         });
     });
-
-    // Handle logout
-    $('#logout').click(function() {
-        $.ajax({
-            url: '/electromart/v1/logout',
-            type: 'POST',
-            success: function(data) {
-                console.log("Logged out successfully:", data);
-                // Here you would clear cookies or session storage
-                $('#dataDisplay').html("Logged out successfully!");
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.error("Logout failed:", textStatus, errorThrown);
-                $('#dataDisplay').html("Logout failed: " + textStatus);
-            }
-        });
-    });
-
-
-
-
 </script>
 </body>
 </html>
