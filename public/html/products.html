@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product Functionality</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .container {
+            width: 100%;
+            height: 100%;
+        }
+        .left, .right {
+            float: left;
+            height: 100%;
+        }
+        .left {
+            width: 40%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .right {
+            width: 60%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        pre {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 10px;
+            overflow: auto;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</head>
+<body>
+<h1>Product Functionality</h1>
+<div>Logged in as: <span id="role">Role</span> - <span id="username">Username</span></div>
+<br>
+<br>
+<div class="container">
+    <div class="left">
+        <section>
+            <h2>Functionality Everyone Can Do</h2>
+            <button id="getAllProducts">Get All Products</button>
+            <div id="products"></div>
+
+            <br>
+            <br>
+
+            <input type="text" id="search" placeholder="Search products...">
+            <button id="searchProduct">Search</button>
+            <div id="searchResults"></div>
+
+            <br>
+            <br>
+
+            <input type="text" id="productId" placeholder="Product ID...">
+            <button id="getProduct">Get Product</button>
+            <div id="productDetails"></div>
+        </section>
+        <br>
+        <br>
+        <br>
+        <br>
+        <section>
+            <h2>Functionality Logged In Users Can Do</h2>
+            <!-- Add the functionalities that only logged in users can do -->
+        </section>
+        <br>
+        <br>
+        <br>
+        <br>
+        <section>
+            <h2>Functionality Admins Can Do</h2>
+            <!-- Post Product -->
+            <p>All input fields must have some text, Category and Manufacturer must match existing entities</p>
+            <input type="text" id="newProductDescription" placeholder="Product Description">
+            <input type="number" id="newProductPrice" placeholder="Price">
+            <input type="number" id="newProductStock" placeholder="Stock">
+            <input type="text" id="newProductCategory" placeholder="Category">
+            <input type="text" id="newProductManufacturer" placeholder="Manufacturer">
+            <button id="postProduct">Post Product</button>
+            <div id="postProductResult"></div>
+            <br>
+            <br>
+            <!-- Patch Product -->
+            <input type="text" id="patchProductDescription" placeholder="New Description">
+            <input type="number" id="patchProductPrice" placeholder="New Price">
+            <input type="number" id="patchProductStock" placeholder="New Stock">
+            <input type="text" id="patchProductCategory" placeholder="New Category">
+            <input type="text" id="patchProductManufacturer" placeholder="New Manufacturer">
+            <button id="patchProduct">Patch Product</button>
+            <div id="patchProductResult"></div>
+            <br>
+            <br>
+            <!-- Delete Product -->
+            <input type="text" id="deleteProductId" placeholder="Product ID">
+            <button id="deleteProduct">Delete Product</button>
+            <div id="deleteProductResult"></div>
+        </section>
+
+    </div>
+    <div class="right">
+        <pre id="dataDisplay"></pre>
+    </div>
+
+</div>
+
+<script>
+
+    $(document).ready(function() {
+        console.log("Document ready");
+
+        // GET all products
+        $('#getAllProducts').click(function() {
+            console.log("Getting all products");
+            $.get('/electromart/v1/products', function(data) {
+                console.log("Received data for all products:", data);
+                $('#dataDisplay').html(JSON.stringify(data, null, 4)); // Nicely format the JSON output
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("Failed to get all products:", textStatus, errorThrown);
+                $('#dataDisplay').html("Failed to get all products: " + textStatus);
+            });
+        });
+
+
+        // Search Product
+        $('#searchProduct').click(function() {
+            var search = encodeURIComponent($('#search').val());
+            console.log("Searching products with query:", search);
+            $.get('/electromart/v1/products/full-text-search/' + search, function(data) {
+                console.log("Received search results:", data);
+                $('#dataDisplay').html(JSON.stringify(data, null, 4));
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("Failed to search products:", textStatus, errorThrown);
+                $('#dataDisplay').html("Failed to search products: " + textStatus);
+            });
+        });
+
+        // Get Product Details
+        $('#getProduct').click(function() {
+            var id = $('#productId').val();
+            console.log("Getting product details for ID:", id);
+            $.get('/electromart/v1/products/' + id, function(data) {
+                console.log("Received product details:", data);
+                $('#dataDisplay').html(JSON.stringify(data, null, 4));
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                var errorInfo = `Failed to get product details. Status: ${textStatus}. Error: ${errorThrown}. Message: ${jqXHR.responseText}`;
+                console.error(errorInfo);
+                $('#dataDisplay').html(JSON.stringify({error: errorInfo}, null, 4));
+            });
+        });
+
+
+        // POST Product
+        $('#postProduct').click(function() {
+            var productData = {
+                description: $('#newProductDescription').val(),
+                price: parseFloat($('#newProductPrice').val()),
+                stock: parseInt($('#newProductStock').val(), 10),
+                category_name: $('#newProductCategory').val(),
+                manufacturer_name: $('#newProductManufacturer').val()
+            };
+            console.log("Posting new product with data:", productData);
+            $.ajax({
+                url: '/electromart/v1/products',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(productData),
+                success: function(data) {
+                    console.log("Product posted successfully:", data);
+                    $('#dataDisplay').html(JSON.stringify(data, null, 4));
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    var errorInfo = `Failed to post product. Status: ${textStatus}. Error: ${errorThrown}. Message: ${jqXHR.responseText}`;
+                    console.error(errorInfo);
+                    $('#dataDisplay').html(JSON.stringify({error: errorInfo}, null, 4));
+                }
+            });
+        });
+
+        // PATCH Product
+        $('#patchProduct').click(function() {
+            var productId = $('#patchProductId').val();
+            var productData = {
+                description: $('#patchProductDescription').val() || null,
+                price: $('#patchProductPrice').val() ? parseFloat($('#patchProductPrice').val()) : null,
+                stock: $('#patchProductStock').val() ? parseInt($('#patchProductStock').val(), 10) : null,
+                category_name: $('#patchProductCategory').val() || null,
+                manufacturer_name: $('#patchProductManufacturer').val() || null
+            };
+            console.log("Patching product ID:", productId, "with data:", productData);
+            $.ajax({
+                url: '/electromart/v1/products/' + productId,
+                type: 'PATCH',
+                contentType: 'application/json',
+                data: JSON.stringify(productData),
+                success: function(data) {
+                    console.log("Product patched successfully:", data);
+                    $('#dataDisplay').html(JSON.stringify(data, null, 4));
+                },
+                error: function(error) {
+                    console.error("Failed to patch product:", error.responseText);
+                    $('#dataDisplay').html('Error: ' + error.responseText);
+                }
+            });
+        });
+
+        // DELETE Product
+        $('#deleteProduct').click(function() {
+            var productId = $('#deleteProductId').val();
+            console.log("Deleting product with ID:", productId);
+            $.ajax({
+                url: '/electromart/v1/products/' + productId,
+                type: 'DELETE',
+                success: function() {
+                    console.log("Product deleted successfully");
+                    $('#dataDisplay').html('Product deleted successfully');
+                },
+                error: function(error) {
+                    console.error("Failed to delete product:", error.responseText);
+                    $('#dataDisplay').html('Error: ' + error.responseText);
+                }
+            });
+        });
+    });
+
+
+</script>
+</body>
+</html>
