@@ -27,6 +27,9 @@ WORKDIR /
 # Copy the binary from the builder container
 COPY --from=builder /db_project/server .
 
+# Copy the static files from the builder container
+COPY --from=builder /db_project/public public
+
 # Expose internal port
 EXPOSE 8080
 

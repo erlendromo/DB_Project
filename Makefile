@@ -25,7 +25,7 @@ swag:
 	swag init -g internal/http/router/route.go && swag fmt
 
 run:
-	swag init -g internal/http/router/route.go && swag fmt && docker compose --env-file=.env --verbose up -d --build
+	swag init -g internal/http/router/route.go && swag fmt && docker compose --env-file=.env --verbose up -d --build && docker compose --env-file=.env logs -f electromart_app
 
 stop:
 	docker compose --env-file=.env down && rm -r dbdata

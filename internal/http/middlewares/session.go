@@ -1,12 +1,31 @@
 package middlewares
 
 import (
+	"DB_Project/internal/http/dependencies"
+	"DB_Project/internal/utils"
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 )
+
+// GenerateRandomID generates a random ID of the specified length
+func GenerateRandomID(length int) (string, error) {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(bytes)[:length], nil
+}
+
+// Used to validate sessions retrieved by cookies
+var sessions map[string]SessionData
+
+func init() {
+	sessions = make(map[string]SessionData)
+}
 
 // SessionData Session data
 //
@@ -14,22 +33,35 @@ import (
 //	@summary		Used to store session data
 //	@description	Used to store session data
 type SessionData struct {
-	UserID    int
+	ID        int
 	Username  string
 	LoginTime time.Time
+	Admin     bool
 }
-
-// sessions map
-// Used to validate sessions retrieved by cookies
-var sessions map[string]SessionData
 
 // SetSession Set a session
 //
 //	@title			SetSession
 //	@summary		Set a session
-//	@description	Set a session with a user ID and username
-func SetSession(w http.ResponseWriter, userID int, username string) {
-	sessionID := fmt.Sprintf("session_%d", userID)
+//	@description	Set a session with a username
+func SetSession(w http.ResponseWriter, username string) error {
+	sessionID, err := GenerateRandomID(32)
+	if err != nil {
+		return err
+	}
+
+	cd := dependencies.Dependencies.CustomerAddressDeps.PSQLCustomer
+
+	c, err := cd.GetCustomerByUsername(context.Background(), username)
+	if err != nil {
+		return err
+	}
+
+	var a bool
+	if c.Role == 1 {
+		a = true
+	}
+
 	expiration := time.Now().Add(12 * time.Hour)
 
 	cookie := &http.Cookie{
@@ -41,10 +73,13 @@ func SetSession(w http.ResponseWriter, userID int, username string) {
 	http.SetCookie(w, cookie)
 
 	sessions[sessionID] = SessionData{
-		UserID:    userID,
-		Username:  username,
+		ID:        c.ID,
+		Username:  c.Username,
 		LoginTime: time.Now(),
+		Admin:     a,
 	}
+
+	return nil
 }
 
 // ClearSession Clear a session
@@ -55,7 +90,7 @@ func SetSession(w http.ResponseWriter, userID int, username string) {
 func ClearSession(w http.ResponseWriter, r *http.Request) (int, error) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		return http.StatusUnauthorized, err
+		return http.StatusUnauthorized, utils.NewUnauthorizedError(err)
 	}
 
 	delete(sessions, cookie.Value)
@@ -86,11 +121,6 @@ func GetUserFromSession(r *http.Request) (SessionData, int, error) {
 		return SessionData{}, http.StatusUnauthorized, errors.New("invalid session ID")
 	}
 
-	// TODO fix problem with session expiration
-	if cookie.Expires.Before(time.Now()) {
-		return SessionData{}, http.StatusUnauthorized, errors.New("session expired")
-	}
-
 	return sessionData, http.StatusOK, nil
 }
 
@@ -101,11 +131,6 @@ const sessionKey SessionKey = "sessionData"
 
 // SessionMiddleware Middleware to handle sessions
 func SessionMiddleware(next http.Handler) http.Handler {
-	// Initialize the sessions map if it is nil
-	if sessions == nil {
-		sessions = make(map[string]SessionData)
-	}
-
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("session")
 		if err == nil {
