@@ -41,8 +41,8 @@ func NewRouter() http.Handler {
 	// full text search, searches on product description, it is case-insensitive and needs to full word exact word match with any word in a description
 	mux.HandleFunc("GET /electromart/v1/products/full-text-search/{search}", handlers.GetFullTextSearchProduct)
 
-	mux.HandleFunc("POST /electromart/v1/products", handlers.PostProduct)
-	mux.HandleFunc("POST /electromart/v1/products/", handlers.PostProduct)
+	mux.HandleFunc("POST /electromart/v1/products", middlewares.AdminMiddleware(handlers.PostProduct))
+	mux.HandleFunc("POST /electromart/v1/products/", middlewares.AdminMiddleware(handlers.PostProduct))
 
 	mux.HandleFunc("DELETE /electromart/v1/products/{id}", handlers.DeleteProduct)
 
