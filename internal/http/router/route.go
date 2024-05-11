@@ -50,27 +50,32 @@ func NewRouter() http.Handler {
 	// full text search, searches on product description, it is case-insensitive and needs to full word exact word match with any word in a description
 	mux.HandleFunc("GET /electromart/v1/products/full-text-search/{search}", handlers.GetFullTextSearchProduct)
 
-	mux.HandleFunc("POST /electromart/v1/products", handlers.PostProduct)
-	mux.HandleFunc("POST /electromart/v1/products/", handlers.PostProduct)
+	mux.HandleFunc("POST /electromart/v1/products", middlewares.AdminMiddleware(handlers.PostProduct))
+	mux.HandleFunc("POST /electromart/v1/products/", middlewares.AdminMiddleware(handlers.PostProduct))
 
-	mux.HandleFunc("DELETE /electromart/v1/products/{id}", handlers.DeleteProduct)
+	mux.HandleFunc("DELETE /electromart/v1/products/{id}", middlewares.AdminMiddleware(handlers.DeleteProduct))
 
-	mux.HandleFunc("PATCH /electromart/v1/products/{id}", handlers.PatchProduct)
+	mux.HandleFunc("PATCH /electromart/v1/products/{id}", middlewares.AdminMiddleware(handlers.PatchProduct))
 
 	// UI
-	mux.HandleFunc("/electromart/v1/html/products", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /electromart/v1/html/products", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "public/html/products.html")
+	})
+	mux.HandleFunc("GET /electromart/v1/html/products/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "public/html/products.html")
 	})
 
 	// showcase handler - the queries we showcase in the report
 
-	mux.HandleFunc("GET /electromart/v1/orders-details/{orderId}", handlers.OrderWithDetails)
-
 	mux.HandleFunc("GET /electromart/v1/discounted-products", handlers.CurrentDiscountedProducts)
+	mux.HandleFunc("GET /electromart/v1/discounted-products/", handlers.CurrentDiscountedProducts)
 
 	mux.HandleFunc("GET /electromart/v1/sales-per-product", handlers.TotalSalesPerProduct)
+	mux.HandleFunc("GET /electromart/v1/sales-per-product/", handlers.TotalSalesPerProduct)
 
-	mux.HandleFunc("GET /electromart/v1/top-customers/{limit}", handlers.TopCustomers)
+	mux.HandleFunc("GET /electromart/v1/orders-details/{orderId}", middlewares.AdminMiddleware(handlers.OrderWithDetails))
+
+	mux.HandleFunc("GET /electromart/v1/top-customers/{limit}", middlewares.AdminMiddleware(handlers.TopCustomers))
 
 	return mux
 }
