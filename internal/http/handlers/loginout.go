@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"DB_Project/internal/http/dependencies"
 	"DB_Project/internal/http/middlewares"
 	"DB_Project/internal/utils"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -19,24 +21,35 @@ type LoginRequest struct {
 
 // LoginLogoutResponse struct
 //
-//	@title			LoginLogoutResponse
-//	@description	This struct will be used to encode the login/logout response
-type LoginLogoutResponse struct {
+//	@title			LoginResponse
+//	@description	This struct will be used to encode the login response
+type LoginResponse struct {
+	UserID   string `json:"user_id"`
+	Username string `json:"username"`
+	Role     string `json:"role"`
+}
+
+// LogoutResponse struct
+//
+//	@title			LogoutResponse
+//	@description	This struct will be used to encode the logout response
+type LogoutResponse struct {
 	Message string `json:"message"`
 }
 
 // Login Log in
 //
 //	@title			Login
-//	@summary		Log in
-//	@description	Log in and set session
+//	@summary		Login
+//	@description	Login and set session
 //	@tags			Login
 //	@accept			json
 //	@produce		json
 //	@param			body	body		LoginRequest	true	"Login request"
-//	@success		200		{object}	LoginLogoutResponse
+//	@success		200		{object}	LoginResponse
+//	@failure		400		{object}	utils.ErrorResponse
 //	@failure		500		{object}	utils.ErrorResponse
-//	@router			/electromart/v1/login [post]
+//	@router			/electromart/v1/customers/login [post]
 func Login(w http.ResponseWriter, r *http.Request) {
 	var loginRequest LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&loginRequest)
@@ -45,13 +58,33 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	customer, err := dependencies.Dependencies.CustomerAddressDeps.PSQLCustomer.GetCustomerByUsername(r.Context(), loginRequest.Username)
+	if err != nil {
+		utils.ERROR(w, http.StatusBadRequest, errors.New("invalid username or password"))
+		return
+	}
+
+	if customer.Password != loginRequest.Password {
+		utils.ERROR(w, http.StatusBadRequest, errors.New("invalid username or password"))
+		return
+	}
+
 	if err := middlewares.SetSession(w, loginRequest.Username); err != nil {
 		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
 		return
 	}
 
-	utils.JSON(w, http.StatusOK, LoginLogoutResponse{
-		Message: fmt.Sprintf("You are logged in as %s!", loginRequest.Username),
+	var role string
+	if customer.Role == 1 {
+		role = "admin"
+	} else {
+		role = "default_customer"
+	}
+
+	utils.JSON(w, http.StatusOK, LoginResponse{
+		UserID:   fmt.Sprint(customer.ID),
+		Username: loginRequest.Username,
+		Role:     role,
 	})
 
 }
@@ -63,9 +96,9 @@ func Login(w http.ResponseWriter, r *http.Request) {
 //	@description	Log out and clear session (requires login)
 //	@tags			Logout
 //	@produce		json
-//	@success		200	{object}	LoginLogoutResponse
+//	@success		200	{object}	LogoutResponse
 //	@failure		401	{object}	utils.ErrorResponse
-//	@router			/electromart/v1/logout [post]
+//	@router			/electromart/v1/customers/logout [post]
 func Logout(w http.ResponseWriter, r *http.Request) {
 	statuscode, err := middlewares.ClearSession(w, r)
 	if err != nil {
@@ -73,7 +106,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.JSON(w, http.StatusOK, LoginLogoutResponse{
-		Message: "You are logged out!",
+	utils.JSON(w, http.StatusOK, LogoutResponse{
+		Message: "You are logged out",
 	})
 }

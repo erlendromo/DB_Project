@@ -23,15 +23,16 @@ To see how each endpoint works, navigate to swagger-documentation on the applica
 
 Before deploying the application, make sure to have the following downloaded on the machine you are running.
 
-- go -> https://go.dev/dl/
-- postgresql -> https://www.postgresql.org/download/
 - docker -> https://www.docker.com/products/docker-desktop/
 - docker compose (linux) -> https://docs.docker.com/compose/install/linux/#install-the-plugin-manually
 
 - FOR WINDOWS USERS
     - gnuwin32 (make) -> https://gnuwin32.sourceforge.net/packages/make.htm
+        - If the make-binary isn't loaded properly in $PATH (enviroment-variable), you need to set it manually in path, or reference the absolute path to that binary when attempting `make *`.
 
 - Optional
+    - go -> https://go.dev/dl/
+    - postgresql -> https://www.postgresql.org/download/
     - swag -> In terminal: `go install github.com/swaggo/swag/cmd/swag@latest`
         - If the swag binary isn't loaded properly in the terminal, the `make run` and `make swag` commands won't work. To fix possible issues with this, add the absolute path to where the swag-binary is located on your machine inside the `make runabsolute` and `make swagabsolute` commands in the Makefile.
 

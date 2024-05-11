@@ -8,6 +8,99 @@
         "version": "1.0"
     },
     "paths": {
+        "/electromart/v1/cart": {
+            "get": {
+                "description": "Returns the cart",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cart"
+                ],
+                "summary": "Get the cart",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CartResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/electromart/v1/cart/{productID}": {
+            "post": {
+                "description": "Adds a product to cart",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cart"
+                ],
+                "summary": "Add a product to cart",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "productID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Quantity",
+                        "name": "quantity",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CartResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/electromart/v1/checkout": {
+            "post": {
+                "description": "Creates an order",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shoppingorder"
+                ],
+                "summary": "Create an order",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/shoppingorderdomain.ShoppingOrderResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/electromart/v1/customers": {
             "get": {
                 "security": [
@@ -45,38 +138,9 @@
                 }
             }
         },
-        "/electromart/v1/discounted-products": {
-            "get": {
-                "description": "List current discounted products",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Showcase"
-                ],
-                "summary": "List current discounted products",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/showcasedomain.DiscountedProduct"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/electromart/v1/login": {
+        "/electromart/v1/customers/login": {
             "post": {
-                "description": "Log in and set session",
+                "description": "Login and set session",
                 "consumes": [
                     "application/json"
                 ],
@@ -86,7 +150,7 @@
                 "tags": [
                     "Login"
                 ],
-                "summary": "Log in",
+                "summary": "Login",
                 "parameters": [
                     {
                         "description": "Login request",
@@ -102,7 +166,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.LoginLogoutResponse"
+                            "$ref": "#/definitions/handlers.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     },
                     "500": {
@@ -114,7 +184,7 @@
                 }
             }
         },
-        "/electromart/v1/logout": {
+        "/electromart/v1/customers/logout": {
             "post": {
                 "description": "Log out and clear session (requires login)",
                 "produces": [
@@ -128,7 +198,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.LoginLogoutResponse"
+                            "$ref": "#/definitions/handlers.LogoutResponse"
                         }
                     },
                     "401": {
@@ -140,7 +210,7 @@
                 }
             }
         },
-        "/electromart/v1/myprofile": {
+        "/electromart/v1/customers/me": {
             "get": {
                 "security": [
                     {
@@ -264,7 +334,102 @@
                 }
             }
         },
-        "/electromart/v1/orders-details/{orderId}": {
+        "/electromart/v1/customers/signup": {
+            "post": {
+                "description": "Create a new customer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Customer"
+                ],
+                "summary": "Create a new customer",
+                "parameters": [
+                    {
+                        "description": "Create customer",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/customeraddressdomain.CreateCustomerAddressRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/customeraddressdomain.DBCustomerAddress"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/electromart/v1/customers/top/{limit}": {
+            "get": {
+                "security": [
+                    {
+                        "AdminAuth": []
+                    }
+                ],
+                "description": "Identify top customers (requires admin login)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Showcase"
+                ],
+                "summary": "Identify top customers",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/showcasedomain.TopCustomer"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/electromart/v1/orders/{orderId}/details": {
             "get": {
                 "security": [
                     {
@@ -394,6 +559,35 @@
                 }
             }
         },
+        "/electromart/v1/products/discounts": {
+            "get": {
+                "description": "List current discounted products",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Showcase"
+                ],
+                "summary": "List current discounted products",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/showcasedomain.DiscountedProduct"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/electromart/v1/products/full-text-search/{search}": {
             "get": {
                 "description": "Get products based on full text search",
@@ -427,6 +621,35 @@
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/electromart/v1/products/sales": {
+            "get": {
+                "description": "Calculate total sales per product",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Showcase"
+                ],
+                "summary": "Calculate total sales per product",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/showcasedomain.ProductSales"
+                            }
                         }
                     },
                     "500": {
@@ -572,130 +795,6 @@
                     }
                 }
             }
-        },
-        "/electromart/v1/sales-per-product": {
-            "get": {
-                "description": "Calculate total sales per product",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Showcase"
-                ],
-                "summary": "Calculate total sales per product",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/showcasedomain.ProductSales"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/electromart/v1/signup": {
-            "post": {
-                "description": "Create a new customer",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Customer"
-                ],
-                "summary": "Create a new customer",
-                "parameters": [
-                    {
-                        "description": "Create customer",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/customeraddressdomain.CreateCustomerAddressRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/customeraddressdomain.DBCustomerAddress"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/electromart/v1/top-customers/{limit}": {
-            "get": {
-                "security": [
-                    {
-                        "AdminAuth": []
-                    }
-                ],
-                "description": "Identify top customers (requires admin login)",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Showcase"
-                ],
-                "summary": "Identify top customers",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Limit",
-                        "name": "limit",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/showcasedomain.TopCustomer"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -788,12 +887,25 @@
                 }
             }
         },
-        "handlers.LoginLogoutResponse": {
-            "description": "This struct will be used to encode the login/logout response",
+        "handlers.CartItem": {
             "type": "object",
             "properties": {
-                "message": {
-                    "type": "string"
+                "productID": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.CartResponse": {
+            "type": "object",
+            "properties": {
+                "cart_items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.CartItem"
+                    }
                 }
             }
         },
@@ -805,6 +917,30 @@
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.LoginResponse": {
+            "description": "This struct will be used to encode the login response",
+            "type": "object",
+            "properties": {
+                "role": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.LogoutResponse": {
+            "description": "This struct will be used to encode the logout response",
+            "type": "object",
+            "properties": {
+                "message": {
                     "type": "string"
                 }
             }
@@ -852,6 +988,72 @@
                 },
                 "stock": {
                     "type": "integer"
+                }
+            }
+        },
+        "shoppingorderdomain.CustomerResponse": {
+            "type": "object",
+            "properties": {
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/customeraddressdomain.Address"
+                    }
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "shoppingorderdomain.ItemResponse": {
+            "type": "object",
+            "properties": {
+                "product_description": {
+                    "type": "string"
+                },
+                "product_id": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "subtotal": {
+                    "type": "number"
+                }
+            }
+        },
+        "shoppingorderdomain.ShoppingOrderResponse": {
+            "type": "object",
+            "properties": {
+                "customer": {
+                    "$ref": "#/definitions/shoppingorderdomain.CustomerResponse"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/shoppingorderdomain.ItemResponse"
+                    }
+                },
+                "order_id": {
+                    "type": "integer"
+                },
+                "placed_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
                 }
             }
         },
