@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Product Functionality</title>
+    <title>Product functionality</title>
+    <p>This is just some example endpoints, see the appendix in the project report for more endpoints.</p>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <style>
         body, html {
@@ -48,7 +49,7 @@
 <div class="container">
     <div class="left">
         <section>
-            <h2>Functionality Everyone Can Do</h2>
+            <h2>Some functionality everyone can do</h2>
             <button id="getAllProducts">Get All Products</button>
             <div id="products"></div>
 
@@ -71,15 +72,33 @@
         <br>
         <br>
         <section>
-            <h2>Functionality Logged In Users Can Do</h2>
-            <!-- functionalities that only logged in users can do -->
+            <h2>Functionality logged in users can do</h2>
+
+            <!-- Add a Product to Cart -->
+            <div>
+                <input type="text" id="itemID" placeholder="Item ID">
+                <input type="number" id="itemQuantity" placeholder="Quantity">
+                <button id="addToCart">Add to cart</button>
+            </div>
+
+            <br>
+
+            <button id="showCart">Show cart</button>
+
+            <br>
+
+            <!-- Checkout -->
+            <div>
+                <button id="checkout">Checkout</button>
+            </div>
         </section>
+
         <br>
         <br>
         <br>
         <br>
         <section>
-            <h2>Functionality Admins Can Do</h2>
+            <h2>Some functionality admins can do</h2>
             <!-- Post Product -->
             <p>All fields must be populated, Category and Manufacturer must match existing entities</p>
             <input type="text" id="newProductDescription" placeholder="Product Description">
@@ -268,7 +287,7 @@
             };
 
             $.ajax({
-                url: '/electromart/v1/login',
+                url: '/electromart/v1/customers/login',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(loginData),
@@ -289,7 +308,7 @@
         // Handle logout
         $('#logout').click(function() {
             $.ajax({
-                url: '/electromart/v1/logout',
+                url: '/electromart/v1/customers/logout',
                 type: 'POST',
                 success: function(data) {
                     console.log("Logged out successfully:", data);
@@ -301,6 +320,62 @@
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.error("Logout failed:", textStatus, errorThrown);
                     $('#dataDisplay').html("Logout failed: " + textStatus);
+                }
+            });
+        });
+
+        // Handle adding a product to the cart
+        $('#addToCart').click(function() {
+            var itemID = $('#itemID').val();
+            var itemQuantity = $('#itemQuantity').val();
+
+            if (itemID && itemQuantity) {
+                $.ajax({
+                    url: '/electromart/v1/cart/' + itemID + '?quantity=' + itemQuantity,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    success: function(data) {
+                        console.log("Added to cart successfully:", data);
+                        $('#dataDisplay').html("Added to cart successfully!");
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error("Failed to add to cart:", textStatus, errorThrown);
+                        $('#dataDisplay').html("Failed to add to cart: " + textStatus);
+                    }
+                });
+            } else {
+                $('#dataDisplay').html("Please enter both item ID and quantity.");
+            }
+        });
+
+        // Handle displaying the cart
+        $('#showCart').click(function() {
+            $.ajax({
+                url: '/electromart/v1/cart',
+                type: 'GET',
+                success: function(data) {
+                    console.log("Cart data:", data);
+                    $('#dataDisplay').html(JSON.stringify(data, null, 4));
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Failed to retrieve cart:", textStatus, errorThrown);
+                    $('#dataDisplay').html("Failed to retrieve cart: " + textStatus);
+                }
+            });
+        });
+
+        // Handle checkout
+        $('#checkout').click(function() {
+            $.ajax({
+                url: '/electromart/v1/checkout',
+                type: 'POST',
+                success: function(data) {
+                    console.log("Checkout successful:", data);
+                    $('#dataDisplay').html("Checkout successful!");
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Checkout failed:", textStatus, errorThrown);
+                    $('#dataDisplay').html("Checkout failed: " + textStatus);
                 }
             });
         });
