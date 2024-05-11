@@ -95,7 +95,7 @@ func (psql *PSQLShowcase) FetchOrderWithDetails(orderID string) (*showcasedomain
             c.email, 
             c.phone_number,
             COUNT(p.id) AS payment_count,
-            STRING_AGG(DISTINCT p.status, ', ') AS payment_statuses,
+            COALESCE(STRING_AGG(DISTINCT p.status, ', '), 'No Payments') AS payment_statuses, -- handles no payment, and multiple payment attempts.
             json_agg(json_build_object('description', pr.description, 'quantity', i.quantity)) AS products_info
         FROM shopping_order o
         JOIN customer c ON o.customer_id = c.id
