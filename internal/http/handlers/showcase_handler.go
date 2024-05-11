@@ -4,17 +4,11 @@ import (
 	"DB_Project/internal/http/dependencies"
 	"DB_Project/internal/utils"
 	"net/http"
-	"strconv"
 )
 
 // TopCustomers handles the request to identify top customers based on the limit specified
 func TopCustomers(w http.ResponseWriter, r *http.Request) {
-	limitStr := r.URL.Query().Get("limit")
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil {
-		http.Error(w, "Invalid limit value", http.StatusBadRequest)
-		return
-	}
+	limit := r.PathValue("limit")
 
 	topCustomers, err := dependencies.Dependencies.ShowcaseDeps.ShowcaseDomain.IdentifyTopCustomers(limit)
 	if err != nil {

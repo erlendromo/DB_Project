@@ -3,14 +3,15 @@ package showcase
 import (
 	s "DB_Project/internal/business/domains/showcasedomain"
 	"database/sql"
-	"github.com/lib/pq"
+	"encoding/json"
+	"fmt"
 )
 
 type Domain interface {
 	CalculateTotalSalesPerProduct() ([]*s.ProductSales, error)
 	ListCurrentDiscountedProducts() ([]*s.DiscountedProduct, error)
 	FetchOrderWithDetails(orderId string) (*s.OrderDetail, error)
-	IdentifyTopCustomers(limit int) ([]*s.TopCustomer, error)
+	IdentifyTopCustomers(limit string) ([]*s.TopCustomer, error)
 }
 
 type PSQLShowcase struct {
@@ -102,8 +103,7 @@ func (psql *PSQLShowcase) FetchOrderWithDetails(orderID string) (*s.OrderDetail,
             c.phone_number,
             COUNT(p.id) AS payment_count,
             STRING_AGG(DISTINCT p.status, ', ') AS payment_statuses,
-            ARRAY_AGG(DISTINCT pr.description) AS product_descriptions,
-            ARRAY_AGG(DISTINCT i.quantity) AS quantities
+            json_agg(json_build_object('description', pr.description, 'quantity', i.quantity)) AS products_info
         FROM shopping_order o
         JOIN customer c ON o.customer_id = c.id
         LEFT JOIN payment p ON o.id = p.shopping_order_id
@@ -120,7 +120,7 @@ func (psql *PSQLShowcase) FetchOrderWithDetails(orderID string) (*s.OrderDetail,
 	row := stmt.QueryRow(orderID)
 
 	var od s.OrderDetail
-	var productDescriptions, quantities []string
+	var productsInfoJSON []byte
 	var paymentStatuses string
 
 	if err := row.Scan(
@@ -135,20 +135,22 @@ func (psql *PSQLShowcase) FetchOrderWithDetails(orderID string) (*s.OrderDetail,
 		&od.PhoneNumber,
 		&od.PaymentCount,
 		&paymentStatuses,
-		pq.Array(&productDescriptions),
-		pq.Array(&quantities)); err != nil {
+		&productsInfoJSON,
+	); err != nil {
 		return nil, err
 	}
 
-	// Populate the OrderDetail struct further if necessary
+	// Parse the JSON array of product info
+	if err := json.Unmarshal(productsInfoJSON, &od.ProductsInfo); err != nil {
+		return nil, fmt.Errorf("error parsing product info: %w", err)
+	}
+
 	od.PaymentStatuses = paymentStatuses
-	od.ProductDescriptions = productDescriptions
-	od.Quantities = quantities
 
 	return &od, nil
 }
 
-func (psql *PSQLShowcase) IdentifyTopCustomers(limit int) ([]*s.TopCustomer, error) {
+func (psql *PSQLShowcase) IdentifyTopCustomers(limit string) ([]*s.TopCustomer, error) {
 	stmt, err := psql.DB.Prepare(`
         SELECT c.id, c.username, COUNT(o.id) AS number_of_orders, SUM(o.total_amount) AS total_spent
         FROM customer c

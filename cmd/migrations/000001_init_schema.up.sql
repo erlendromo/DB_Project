@@ -57,7 +57,6 @@ CREATE TABLE IF NOT EXISTS "product" (
   "stock" INTEGER NOT NULL
 );
 
-CREATE INDEX product_description_idx ON product (description);
 CREATE INDEX product_description_fts_idx ON product USING gin(to_tsvector('english', description));
 
 CREATE TABLE IF NOT EXISTS "product_discount" (
@@ -170,10 +169,15 @@ INSERT INTO "manufacturer" ("name", "description", "phone_number") VALUES ('Iigl
 INSERT INTO "manufacturer" ("name", "description", "phone_number") VALUES ('Philips', 'Koninklijke Philips N.V. is a Dutch multinational conglomerate corporation', '0987654321');
 INSERT INTO "manufacturer" ("name", "description", "phone_number") VALUES ('Roborock', 'Roborock is a Chinese manufacturer of robotic vacuum cleaners', '1234567890');
 
-INSERT INTO "discount" ("percentage", "description", "start_at", "end_at") VALUES ('0.20', 'Summer sale', '2024-01-06 00:00:00', '2024-07-31 23:59:59');
-INSERT INTO "discount" ("percentage", "description", "start_at", "end_at") VALUES ('0.33', 'Autumn sale', '2024-09-01 00:00:00', '2024-11-30 23:59:59');
-INSERT INTO "discount" ("percentage", "description", "start_at", "end_at") VALUES ('0.50', 'Black Friday', '2024-11-29 00:00:00', '2024-11-30 23:59:59');
-INSERT INTO "discount" ("percentage", "description", "start_at", "end_at") VALUES ('0.10', 'Winter sale', '2024-12-01 00:00:00', '2024-12-31 23:59:59');
+-- Adding different discounts with a stat and end time
+INSERT INTO "discount" ("percentage", "description", "start_at", "end_at") VALUES
+(0.20, 'Summer sale', '2024-01-06 00:00:00', '2024-07-31 23:59:59'),
+(0.33, 'Autumn sale', '2024-09-01 00:00:00', '2024-11-30 23:59:59'),
+(0.50, 'Black Friday', '2024-11-29 00:00:00', '2024-11-30 23:59:59'),
+(0.10, 'Winter sale', '2024-12-01 00:00:00', '2024-12-31 23:59:59'),
+(0.20, 'Spring Sale', '2024-01-06 00:00:00', '2024-07-31 23:59:59'),
+(0.35, 'Exclusive Online Sale', '2024-05-01 00:00:00', '2024-05-14 23:59:59'),
+(0.25, 'End of Season Clearance', '2024-01-06 00:00:00', '2024-07-31 23:59:59');
 
 INSERT INTO "product" ("category_name", "manufacturer_name", "description", "price", "stock") VALUES ('Computer equipment', 'ASUS', 'ASUS 27" ROG Strix XG27AQ', 5995.00, 20);
 INSERT INTO "product" ("category_name", "manufacturer_name", "description", "price", "stock") VALUES ('Computer equipment', 'ASUS', 'ASUS 27" gamingskjerm TUF VG279QM', 3995.00, 10);
@@ -210,50 +214,6 @@ INSERT INTO "product" ("category_name", "manufacturer_name", "description", "pri
 INSERT INTO "product" ("category_name", "manufacturer_name", "description", "price", "stock") VALUES ('Home & Leisure', 'Philips', 'Philips OneBlade Pro 360 Face + Body QP6551/15', 1099.00, 9);
 INSERT INTO "product" ("category_name", "manufacturer_name", "description", "price", "stock") VALUES ('Home & Leisure', 'Roborock', 'Roborock S7 Robot Vacuum Cleaner (black)', 8990.00, 3);
 
-INSERT INTO "payment_method" ("method", "description", "fee") VALUES ('Vipps', 'Vipps is a Norwegian mobile payment application', 15.00);
-INSERT INTO "payment_method" ("method", "description", "fee") VALUES ('Klarna', 'Klarna is a Swedish bank that provides online financial services', 25.00);
-INSERT INTO "payment_method" ("method", "description", "fee") VALUES ('Visa', 'Visa is an American multinational financial services corporation', 10.00);
-INSERT INTO "payment_method" ("method", "description", "fee") VALUES ('Mastercard', 'Mastercard is an American multinational financial services corporation', 0.00);
-INSERT INTO "payment_method" ("method", "description", "fee") VALUES ('PayPal', 'PayPal Holdings, Inc. is an American company operating an online payments system', 20.00);
-INSERT INTO "payment_method" ("method", "description", "fee") VALUES ('Invoice', 'Invoice payment', 40.00);
-
-INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('Posten', 'Posten Norge AS is the Norwegian postal service', 50.00);
-INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('DHL', 'DHL Express is a division of the German logistics company Deutsche Post DHL', 100.00);
-INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('UPS', 'United Parcel Service, Inc. is an American multinational package delivery and supply chain management company', 75.00);
-INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('FedEx', 'FedEx Corporation is an American multinational delivery services company', 90.00);
-INSERT INTO "shipping_method" ("method", "description", "fee") VALUES ('Bring', 'Bring is a Norwegian postal and logistics company', 60.00);
-
--- Showcase dummy data
-
-INSERT INTO "customer" ("username", "password", "first_name", "last_name", "email", "phone_number", "role") VALUES
-('john_doe', 'password123', 'John', 'Doe', 'john.doe@example.com', '1234567890', 2),
-('jane_smith', 'password456', 'Jane', 'Smith', 'jane.smith@example.com', '0987654321', 2),
-('alice_jones', 'password789', 'Alice', 'Jones', 'alice.jones@example.com', '2345678901', 2),
-('bob_brown', 'password101', 'Bob', 'Brown', 'bob.brown@example.com', '3456789012', 2);
-
-INSERT INTO "address" ("zipcode", "street") VALUES
-('0010', '123 Oslo'),
-('2000', '456 Lillestrøm'),
-('2372', '789 Brøttum'),
-('3010', '101 Drammen');
-
-INSERT INTO "customer_address" ("customer_id", "address_id", "primary_address") VALUES
-(1, 1, TRUE),
-(2, 2, TRUE),
-(3, 3, TRUE),
-(4, 4, TRUE);
-
-INSERT INTO "discount" ("percentage", "description", "start_at", "end_at") VALUES
-(10, 'Winter Sale', '2023-12-01 00:00:00', '2024-01-31 23:59:59'),
-(20, 'Spring Sale', '2024-01-06 00:00:00', '2024-07-31 23:59:59'),
-(15, 'Exclusive Online Sale', '2024-05-01 00:00:00', '2024-05-14 23:59:59'),
-(25, 'End of Season Clearance', '2024-01-06 00:00:00', '2024-07-31 23:59:59');
-
-INSERT INTO "product" ("category_name", "manufacturer_name", "description", "price", "stock") VALUES
-('PC & Tablets', 'Apple', 'Apple MacBook Air 13"', 999.00, 15),
-('Phones & Watches', 'Apple', 'Apple iPhone 13', 799.00, 20),
-('Computer equipment', 'Dell', 'Dell XPS 15 Laptop', 1200.00, 10);
-
 
 -- Linking products to discounts
 INSERT INTO "product_discount" ("product_id", "discount_id") VALUES
@@ -264,20 +224,47 @@ INSERT INTO "product_discount" ("product_id", "discount_id") VALUES
 (3, 5),
 (4, 6),
 (5, 7),
-(6, 8),
+(6, 7),
 (7, 6),
 (8, 6),
 (9, 6),
-(10, 8);
-
+(10, 7);
 
 -- Insert payment methods
 INSERT INTO "payment_method" ("method", "description", "fee") VALUES
-('Debit Card', 'Payments directly from a bank account', 0.00),
-('Credit Card', 'Standard credit card payment', 0.00),
-('Apple Pay', 'Pay using Apple Pay with your Apple devices', 2.00),
-('Google Pay', 'Pay using Google Pay with your Android devices', 2.00),
-('PayPal', 'Pay via PayPal', 5.00);
+('Vipps', 'Vipps is a Norwegian mobile payment application', 15.00),
+('Klarna', 'Klarna is a Swedish bank that provides online financial services', 25.00),
+('Visa', 'Visa is an American multinational financial services corporation', 10.00),
+('Mastercard', 'Mastercard is an American multinational financial services corporation', 0.00),
+('PayPal', 'PayPal Holdings, Inc. is an American company operating an online payments system', 20.00),
+('Invoice', 'Invoice payment', 40.00);
+
+-- Shipping methods
+INSERT INTO "shipping_method" ("method", "description", "fee") VALUES
+('Posten', 'Posten Norge AS is the Norwegian postal service', 50.00),
+('DHL', 'DHL Express is a division of the German logistics company Deutsche Post DHL', 100.00),
+('UPS', 'United Parcel Service, Inc. is an American multinational package delivery and supply chain management company', 75.00),
+('FedEx', 'FedEx Corporation is an American multinational delivery services company', 90.00),
+('Bring', 'Bring is a Norwegian postal and logistics company', 60.00);
+
+-- Adding sample users
+INSERT INTO "customer" ("username", "password", "first_name", "last_name", "email", "phone_number", "role") VALUES
+('john_doe', 'password123', 'John', 'Doe', 'john.doe@example.com', '1234567890', 2),
+('jane_smith', 'password456', 'Jane', 'Smith', 'jane.smith@example.com', '0987654321', 2),
+('alice_jones', 'password789', 'Alice', 'Jones', 'alice.jones@example.com', '2345678901', 2),
+('bob_brown', 'password101', 'Bob', 'Brown', 'bob.brown@example.com', '3456789012', 2);
+
+INSERT INTO "address" ("zipcode", "street") VALUES
+('0010', '123 street'),
+('2000', '456 street'),
+('2372', '789 street'),
+('3010', '101 street');
+
+INSERT INTO "customer_address" ("customer_id", "address_id", "primary_address") VALUES
+(1, 1, TRUE),
+(2, 2, TRUE),
+(3, 3, TRUE),
+(4, 4, TRUE);
 
 
 -- Varied orders with simple and realistic scenarios
@@ -286,8 +273,7 @@ INSERT INTO "shopping_order" ("customer_id", "placed_at", "total_amount", "statu
 (2, '2024-05-02 15:45:00', 1250.00, 'Shipped'),
 (1, '2024-05-03 14:20:00', 2300.00, 'Cancelled'),
 (2, '2024-05-04 16:00:00', 850.00, 'Processing'),
-(2, '2024-05-05 17:00:00', 2990.00, 'Pending');
-
+(2, '2024-05-05 17:00:00', 13334.00, 'Pending');
 
 -- Items for the orders, each matching an order ID
 INSERT INTO "item" ("shopping_order_id", "product_id", "quantity", "sub_total") VALUES
@@ -295,8 +281,8 @@ INSERT INTO "item" ("shopping_order_id", "product_id", "quantity", "sub_total") 
 (2, 2, 1, 1250.00),
 (3, 3, 2, 2000.00),
 (4, 4, 1, 850.00),
-(5, 5, 2, 2990.00);
-
+(5, 5, 1, 6790.00), -- buying a single PlayStation slim, order 5
+(5, 7, 2, 6544.00); -- buying two nintendo switches on 20% discount, order 5
 
 -- Payments for the orders, one payment method per order
 INSERT INTO "payment" ("shopping_order_id", "payment_method_id", "status") VALUES

@@ -61,7 +61,7 @@ func NewRouter() http.Handler {
 
 	mux.HandleFunc("GET /electromart/v1/sales-per-product", handlers.TotalSalesPerProduct)
 
-	mux.HandleFunc("GET /electromart/v1/top-customers", handlers.TopCustomers)
+	mux.HandleFunc("GET /electromart/v1/top-customers/{limit}", handlers.TopCustomers)
 
 	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
 	// mux.HandleFunc("GET /electromart/v1/myprofile/", handlers.GetUserByID)
