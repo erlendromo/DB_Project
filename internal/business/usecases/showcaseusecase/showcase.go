@@ -1,30 +1,23 @@
-package showcase
+package showcaseusecase
 
 import (
-	s "DB_Project/internal/business/domains/showcasedomain"
+	"DB_Project/internal/business/domains/showcasedomain"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 )
 
-type Domain interface {
-	CalculateTotalSalesPerProduct() ([]*s.ProductSales, error)
-	ListCurrentDiscountedProducts() ([]*s.DiscountedProduct, error)
-	FetchOrderWithDetails(orderId string) (*s.OrderDetail, error)
-	IdentifyTopCustomers(limit string) ([]*s.TopCustomer, error)
-}
-
 type PSQLShowcase struct {
 	DB *sql.DB
 }
 
-func NewPSQLShowcase(db *sql.DB) Domain {
+func NewPSQLShowcase(db *sql.DB) showcasedomain.ShowcaseDomain {
 	return &PSQLShowcase{
 		DB: db,
 	}
 }
 
-func (psql *PSQLShowcase) CalculateTotalSalesPerProduct() ([]*s.ProductSales, error) {
+func (psql *PSQLShowcase) CalculateTotalSalesPerProduct() ([]*showcasedomain.ProductSales, error) {
 	stmt, err := psql.DB.Prepare(`
         SELECT p.id, p.description, SUM(i.sub_total) AS total_sales
         FROM product p
@@ -42,9 +35,9 @@ func (psql *PSQLShowcase) CalculateTotalSalesPerProduct() ([]*s.ProductSales, er
 	}
 	defer rows.Close()
 
-	var sales []*s.ProductSales
+	var sales []*showcasedomain.ProductSales
 	for rows.Next() {
-		var s s.ProductSales
+		var s showcasedomain.ProductSales
 		if err := rows.Scan(&s.ProductID, &s.Description, &s.TotalSales); err != nil {
 			return nil, err
 		}
@@ -56,7 +49,7 @@ func (psql *PSQLShowcase) CalculateTotalSalesPerProduct() ([]*s.ProductSales, er
 	return sales, nil
 }
 
-func (psql *PSQLShowcase) ListCurrentDiscountedProducts() ([]*s.DiscountedProduct, error) {
+func (psql *PSQLShowcase) ListCurrentDiscountedProducts() ([]*showcasedomain.DiscountedProduct, error) {
 	stmt, err := psql.DB.Prepare(`
         SELECT p.id, p.description, d.percentage, d.description AS discount_description, d.end_at
         FROM product p
@@ -75,9 +68,9 @@ func (psql *PSQLShowcase) ListCurrentDiscountedProducts() ([]*s.DiscountedProduc
 	}
 	defer rows.Close()
 
-	var discountedProducts []*s.DiscountedProduct
+	var discountedProducts []*showcasedomain.DiscountedProduct
 	for rows.Next() {
-		var dp s.DiscountedProduct
+		var dp showcasedomain.DiscountedProduct
 		if err := rows.Scan(&dp.ProductID, &dp.Description, &dp.DiscountPercentage, &dp.DiscountDescription, &dp.EndDate); err != nil {
 			return nil, err
 		}
@@ -89,7 +82,7 @@ func (psql *PSQLShowcase) ListCurrentDiscountedProducts() ([]*s.DiscountedProduc
 	return discountedProducts, nil
 }
 
-func (psql *PSQLShowcase) FetchOrderWithDetails(orderID string) (*s.OrderDetail, error) {
+func (psql *PSQLShowcase) FetchOrderWithDetails(orderID string) (*showcasedomain.OrderDetail, error) {
 	stmt, err := psql.DB.Prepare(`
         SELECT 
             o.id, 
@@ -119,7 +112,7 @@ func (psql *PSQLShowcase) FetchOrderWithDetails(orderID string) (*s.OrderDetail,
 
 	row := stmt.QueryRow(orderID)
 
-	var od s.OrderDetail
+	var od showcasedomain.OrderDetail
 	var productsInfoJSON []byte
 	var paymentStatuses string
 
@@ -150,7 +143,7 @@ func (psql *PSQLShowcase) FetchOrderWithDetails(orderID string) (*s.OrderDetail,
 	return &od, nil
 }
 
-func (psql *PSQLShowcase) IdentifyTopCustomers(limit string) ([]*s.TopCustomer, error) {
+func (psql *PSQLShowcase) IdentifyTopCustomers(limit string) ([]*showcasedomain.TopCustomer, error) {
 	stmt, err := psql.DB.Prepare(`
         SELECT c.id, c.username, COUNT(o.id) AS number_of_orders, SUM(o.total_amount) AS total_spent
         FROM customer c
@@ -170,9 +163,9 @@ func (psql *PSQLShowcase) IdentifyTopCustomers(limit string) ([]*s.TopCustomer, 
 	}
 	defer rows.Close()
 
-	var topCustomers []*s.TopCustomer
+	var topCustomers []*showcasedomain.TopCustomer
 	for rows.Next() {
-		var tc s.TopCustomer
+		var tc showcasedomain.TopCustomer
 		if err := rows.Scan(&tc.CustomerID, &tc.Username, &tc.NumberOfOrders, &tc.TotalSpent); err != nil {
 			return nil, err
 		}

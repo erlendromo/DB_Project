@@ -214,7 +214,6 @@ INSERT INTO "product" ("category_name", "manufacturer_name", "description", "pri
 INSERT INTO "product" ("category_name", "manufacturer_name", "description", "price", "stock") VALUES ('Home & Leisure', 'Philips', 'Philips OneBlade Pro 360 Face + Body QP6551/15', 1099.00, 9);
 INSERT INTO "product" ("category_name", "manufacturer_name", "description", "price", "stock") VALUES ('Home & Leisure', 'Roborock', 'Roborock S7 Robot Vacuum Cleaner (black)', 8990.00, 3);
 
-
 -- Linking products to discounts
 INSERT INTO "product_discount" ("product_id", "discount_id") VALUES
 (1, 1),
@@ -252,19 +251,22 @@ INSERT INTO "customer" ("username", "password", "first_name", "last_name", "emai
 ('john_doe', 'password123', 'John', 'Doe', 'john.doe@example.com', '1234567890', 2),
 ('jane_smith', 'password456', 'Jane', 'Smith', 'jane.smith@example.com', '0987654321', 2),
 ('alice_jones', 'password789', 'Alice', 'Jones', 'alice.jones@example.com', '2345678901', 2),
-('bob_brown', 'password101', 'Bob', 'Brown', 'bob.brown@example.com', '3456789012', 2);
+('bob_brown', 'password101', 'Bob', 'Brown', 'bob.brown@example.com', '3456789012', 2),
+('admin', 'admin', 'Admin', 'Admin', 'admin@admin.admin', '11111111', 1);
 
 INSERT INTO "address" ("zipcode", "street") VALUES
 ('0010', '123 street'),
 ('2000', '456 street'),
 ('2372', '789 street'),
-('3010', '101 street');
+('3010', '101 street'),
+('0010', 'Admin street 1');
 
 INSERT INTO "customer_address" ("customer_id", "address_id", "primary_address") VALUES
 (1, 1, TRUE),
 (2, 2, TRUE),
 (3, 3, TRUE),
-(4, 4, TRUE);
+(4, 4, TRUE),
+(5, 5, TRUE);
 
 
 -- Varied orders with simple and realistic scenarios

@@ -1,4 +1,175 @@
 definitions:
+  customeraddressdomain.Address:
+    properties:
+      city:
+        type: string
+      street:
+        type: string
+      zip_code:
+        type: string
+    type: object
+  customeraddressdomain.CreateCustomerAddressRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+      primary_address:
+        type: boolean
+      street:
+        type: string
+      username:
+        type: string
+      zip_code:
+        type: string
+    type: object
+  customeraddressdomain.CustomerAddresses:
+    properties:
+      addresses:
+        items:
+          $ref: '#/definitions/customeraddressdomain.Address'
+        type: array
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+      username:
+        type: string
+    type: object
+  customeraddressdomain.DBCustomerAddress:
+    properties:
+      addressID:
+        type: integer
+      customerID:
+        type: integer
+      primaryAddress:
+        type: boolean
+    type: object
+  handlers.LoginLogoutResponse:
+    description: This struct will be used to encode the login/logout response
+    properties:
+      message:
+        type: string
+    type: object
+  handlers.LoginRequest:
+    description: This struct will be used to decode the login request body
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  productdomain.PointerProduct:
+    properties:
+      category_name:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      manufacturer_name:
+        type: string
+      price:
+        type: number
+      stock:
+        type: integer
+    type: object
+  productdomain.Product:
+    properties:
+      category_name:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      manufacturer_name:
+        type: string
+      price:
+        type: number
+      stock:
+        type: integer
+    type: object
+  showcasedomain.DiscountedProduct:
+    properties:
+      description:
+        type: string
+      discountDescription:
+        type: string
+      discountPercentage:
+        type: number
+      endDate:
+        type: string
+      productID:
+        type: integer
+    type: object
+  showcasedomain.OrderDetail:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      orderID:
+        type: integer
+      paymentCount:
+        type: integer
+      paymentStatuses:
+        type: string
+      phoneNumber:
+        type: string
+      placedAt:
+        type: string
+      productsInfo:
+        items:
+          $ref: '#/definitions/showcasedomain.ProductInfo'
+        type: array
+      status:
+        type: string
+      totalAmount:
+        type: number
+      username:
+        type: string
+    type: object
+  showcasedomain.ProductInfo:
+    properties:
+      description:
+        type: string
+      quantity:
+        type: integer
+    type: object
+  showcasedomain.ProductSales:
+    properties:
+      description:
+        type: string
+      productID:
+        type: integer
+      totalSales:
+        type: number
+    type: object
+  showcasedomain.TopCustomer:
+    properties:
+      customerID:
+        type: integer
+      numberOfOrders:
+        type: integer
+      totalSpent:
+        type: number
+      username:
+        type: string
+    type: object
   utils.ErrorResponse:
     description: Error Response with message and statuscode
     properties:
@@ -16,7 +187,7 @@ info:
 paths:
   /electromart/v1/customers:
     get:
-      description: Get all customers
+      description: Get all customers (requires admin login)
       produces:
       - application/json
       responses:
@@ -28,28 +199,432 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
       - AdminAuth: []
       summary: Get all customers
       tags:
       - Customer
-  /electromart/v1/customers/:
+  /electromart/v1/discounted-products:
     get:
-      description: Get all customers
+      description: List current discounted products
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: json
+            items:
+              $ref: '#/definitions/showcasedomain.DiscountedProduct'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: List current discounted products
+      tags:
+      - Showcase
+  /electromart/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Log in and set session
+      parameters:
+      - description: Login request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LoginLogoutResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Log in
+      tags:
+      - Login
+  /electromart/v1/logout:
+    post:
+      description: Log out and clear session (requires login)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LoginLogoutResponse'
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
+      summary: Log out
+      tags:
+      - Logout
+  /electromart/v1/myprofile:
+    delete:
+      description: Delete my profile (requires login)
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
       security:
-      - AdminAuth: []
-      summary: Get all customers
+      - UserAuth: []
+      summary: Delete my profile
       tags:
       - Customer
+    get:
+      description: Get my profile (requires login)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/customeraddressdomain.CustomerAddresses'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - UserAuth: []
+      summary: Get my profile
+      tags:
+      - Customer
+    put:
+      consumes:
+      - application/json
+      description: Update my profile (requires login)
+      parameters:
+      - description: Update customer
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/customeraddressdomain.CreateCustomerAddressRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/customeraddressdomain.CreateCustomerAddressRequest'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - UserAuth: []
+      summary: Update my profile
+      tags:
+      - Customer
+  /electromart/v1/orders-details/{orderId}:
+    get:
+      description: Fetch order with details (requires admin login)
+      parameters:
+      - description: Order ID
+        in: path
+        name: orderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/showcasedomain.OrderDetail'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - AdminAuth: []
+      summary: Fetch order with details
+      tags:
+      - Showcase
+  /electromart/v1/products:
+    get:
+      description: Get all products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/productdomain.Product'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all products
+      tags:
+      - Products
+    post:
+      consumes:
+      - application/json
+      description: Post a product (requires admin login)
+      parameters:
+      - description: Product to post
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/productdomain.Product'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/productdomain.Product'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - AdminAuth: []
+      summary: Post a product
+      tags:
+      - Products
+  /electromart/v1/products/{id}:
+    delete:
+      description: Delete a product (requires admin login)
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - AdminAuth: []
+      summary: Delete a product
+      tags:
+      - Products
+    get:
+      description: Get a product
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/productdomain.Product'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get a product
+      tags:
+      - Products
+    patch:
+      consumes:
+      - application/json
+      description: Patch a product (requires admin login)
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Product to patch
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/productdomain.PointerProduct'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/productdomain.Product'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - AdminAuth: []
+      summary: Patch a product
+      tags:
+      - Products
+  /electromart/v1/products/full-text-search/{search}:
+    get:
+      description: Get products based on full text search
+      parameters:
+      - description: Search string
+        in: path
+        name: search
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/productdomain.Product'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get products based on full text search
+      tags:
+      - Products
+  /electromart/v1/sales-per-product:
+    get:
+      description: Calculate total sales per product
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/showcasedomain.ProductSales'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Calculate total sales per product
+      tags:
+      - Showcase
+  /electromart/v1/signup:
+    post:
+      consumes:
+      - application/json
+      description: Create a new customer
+      parameters:
+      - description: Create customer
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/customeraddressdomain.CreateCustomerAddressRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/customeraddressdomain.DBCustomerAddress'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a new customer
+      tags:
+      - Customer
+  /electromart/v1/top-customers/{limit}:
+    get:
+      description: Identify top customers (requires admin login)
+      parameters:
+      - description: Limit
+        in: path
+        name: limit
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/showcasedomain.TopCustomer'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - AdminAuth: []
+      summary: Identify top customers
+      tags:
+      - Showcase
 swagger: "2.0"

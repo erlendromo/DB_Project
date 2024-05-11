@@ -1,13 +1,24 @@
 package middlewares
 
 import (
+	"DB_Project/internal/http/dependencies"
 	"DB_Project/internal/utils"
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 )
+
+// GenerateRandomID generates a random ID of the specified length
+func GenerateRandomID(length int) (string, error) {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(bytes)[:length], nil
+}
 
 // Used to validate sessions retrieved by cookies
 var sessions map[string]SessionData
@@ -22,7 +33,7 @@ func init() {
 //	@summary		Used to store session data
 //	@description	Used to store session data
 type SessionData struct {
-	UserID    int
+	ID        int
 	Username  string
 	LoginTime time.Time
 	Admin     bool
@@ -32,16 +43,26 @@ type SessionData struct {
 //
 //	@title			SetSession
 //	@summary		Set a session
-//	@description	Set a session with a user ID and username
-func SetSession(w http.ResponseWriter, userID int, username string) {
-	sessionID := fmt.Sprintf("session_%d", userID)
-	expiration := time.Now().Add(12 * time.Hour)
+//	@description	Set a session with a username
+func SetSession(w http.ResponseWriter, username string) error {
+	sessionID, err := GenerateRandomID(32)
+	if err != nil {
+		return err
+	}
 
-	// TODO replace with call to database
+	cd := dependencies.Dependencies.CustomerAddressDeps.PSQLCustomer
+
+	c, err := cd.GetCustomerByUsername(context.Background(), username)
+	if err != nil {
+		return err
+	}
+
 	var a bool
-	if userID == 6969 {
+	if c.Role == 1 {
 		a = true
 	}
+
+	expiration := time.Now().Add(12 * time.Hour)
 
 	cookie := &http.Cookie{
 		Name:    "session",
@@ -52,11 +73,13 @@ func SetSession(w http.ResponseWriter, userID int, username string) {
 	http.SetCookie(w, cookie)
 
 	sessions[sessionID] = SessionData{
-		UserID:    userID,
-		Username:  username,
+		ID:        c.ID,
+		Username:  c.Username,
 		LoginTime: time.Now(),
 		Admin:     a,
 	}
+
+	return nil
 }
 
 // ClearSession Clear a session

@@ -1,46 +1,22 @@
 package customeraddressdomain
 
-import "errors"
-
-type AddressDomain interface {
-	CreateAddress(address *CreateAddress) (*Address, error)
-	GetAddressByID(id int) (*Address, error)
-	UpdateAddress(id int, address *CreateAddress) (*Address, error)
-	SoftDeleteAddress(id int) error
-}
-
-type DBZip struct {
-	Zip  string `db:"zip"`
-	City string `db:"city"`
-}
+import (
+	"context"
+	"errors"
+	"strconv"
+)
 
 type DBAddress struct {
 	ID      int    `db:"id"`
-	ZipCode DBZip  `db:"zip_code"`
+	ZipCode string `db:"zipcode"`
 	Street  string `db:"street"`
 	Deleted bool   `db:"deleted"`
 }
 
 type Address struct {
-	ZipCode int    `json:"zip_code"`
+	ZipCode string `json:"zip_code"`
+	City    string `json:"city"`
 	Street  string `json:"street"`
-}
-
-type CreateZip struct {
-	Zip  string `json:"zip"`
-	City string `json:"city"`
-}
-
-func (c *CreateZip) Validate() error {
-	if len(c.Zip) != 4 {
-		return errors.New("zip must be 4 characters")
-	}
-
-	if len(c.City) < 4 {
-		return errors.New("city must be at least 4 characters")
-	}
-
-	return nil
 }
 
 type CreateAddress struct {
@@ -48,16 +24,46 @@ type CreateAddress struct {
 	Street  string `json:"street"`
 }
 
-func (c *CreateAddress) Validate() error {
-	if len(c.ZipCode) < 4 {
-		return errors.New("zip code must be at least 4 characters")
+func (c *CreateAddress) SetCity() (*Address, error) {
+	a := &Address{
+		ZipCode: c.ZipCode,
+		Street:  c.Street,
 	}
 
-	if len(c.Street) < 4 {
-		return errors.New("street must be at least 4 characters")
+	zipInt, err := strconv.Atoi(c.ZipCode)
+	if err != nil {
+		return nil, err
 	}
 
-	// TODO add add of city for specific zipcodes? (use map with zipcodes as keys and cities as values)
+	if zipInt < 10 {
+		return nil, errors.New("invalid zip code")
+	} else if zipInt < 2000 {
+		a.City = "Oslo"
+	} else if zipInt < 3000 {
+		a.City = "Lillestrøm"
+	} else if zipInt < 4000 {
+		a.City = "Drammen"
+	} else if zipInt < 5000 {
+		a.City = "Stavanger"
+	} else if zipInt < 6000 {
+		a.City = "Bergen"
+	} else if zipInt < 7000 {
+		a.City = "Ålesund"
+	} else if zipInt < 8000 {
+		a.City = "Trondheim"
+	} else if zipInt < 9000 {
+		a.City = "Bodø"
+	} else if zipInt < 10000 {
+		a.City = "Tromsø"
+	} else {
+		return nil, errors.New("invalid zip code")
+	}
 
-	return nil
+	return a, nil
+}
+
+type AddressDomain interface {
+	CreateAddress(ctx context.Context, address *CreateAddress) (int, error)
+	GetAddressByID(ctx context.Context, id int) (*Address, error)
+	SoftDeleteAddress(ctx context.Context, id int) error
 }
