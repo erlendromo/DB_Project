@@ -10,7 +10,7 @@ import (
 func TopCustomers(w http.ResponseWriter, r *http.Request) {
 	limit := r.PathValue("limit")
 
-	topCustomers, err := dependencies.Dependencies.ShowcaseDeps.ShowcaseDomain.IdentifyTopCustomers(limit)
+	topCustomers, err := dependencies.Dependencies.ShowcaseDeps.PSQLShowcase.IdentifyTopCustomers(limit)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -24,7 +24,7 @@ func OrderWithDetails(w http.ResponseWriter, r *http.Request) {
 
 	orderId := r.PathValue("orderId")
 
-	orderDetails, err := dependencies.Dependencies.ShowcaseDeps.ShowcaseDomain.FetchOrderWithDetails(orderId)
+	orderDetails, err := dependencies.Dependencies.ShowcaseDeps.PSQLShowcase.FetchOrderWithDetails(orderId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -35,7 +35,7 @@ func OrderWithDetails(w http.ResponseWriter, r *http.Request) {
 
 // CurrentDiscountedProducts handles the request to list currently discounted products
 func CurrentDiscountedProducts(w http.ResponseWriter, r *http.Request) {
-	discountedProducts, err := dependencies.Dependencies.ShowcaseDeps.ShowcaseDomain.ListCurrentDiscountedProducts()
+	discountedProducts, err := dependencies.Dependencies.ShowcaseDeps.PSQLShowcase.ListCurrentDiscountedProducts()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -46,7 +46,7 @@ func CurrentDiscountedProducts(w http.ResponseWriter, r *http.Request) {
 
 // TotalSalesPerProduct handles the request for calculating total sales per product
 func TotalSalesPerProduct(w http.ResponseWriter, r *http.Request) {
-	sales, err := dependencies.Dependencies.ShowcaseDeps.ShowcaseDomain.CalculateTotalSalesPerProduct()
+	sales, err := dependencies.Dependencies.ShowcaseDeps.PSQLShowcase.CalculateTotalSalesPerProduct()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

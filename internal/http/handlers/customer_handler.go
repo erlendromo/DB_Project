@@ -33,9 +33,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cd := dependencies.Dependencies.CustomerAddressDeps.PSQLCustomerAddress
-
-	customer, err := cd.CreateCustomerAddress(r.Context(), &signuprequest)
+	customer, err := dependencies.Dependencies.CustomerAddressDeps.PSQLCustomerAddress.CreateCustomerAddress(r.Context(), &signuprequest)
 	if err != nil {
 		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
 		return
@@ -62,7 +60,7 @@ func MyProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cd := dependencies.Dependencies.PSQLCustomerAddress
+	cd := dependencies.Dependencies.CustomerAddressDeps.PSQLCustomerAddress
 
 	customer, err := cd.GetCustomerAddressesByCustomerID(r.Context(), sessiondata.ID)
 	if err != nil {
@@ -106,9 +104,7 @@ func UpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 
 	// TODO fix this (is scuffed atm)
 
-	cd := dependencies.Dependencies.PSQLCustomer
-
-	if err = cd.UpdateCustomer(r.Context(), sessiondata.ID, &customeraddressdomain.CreateCustomer{
+	if err = dependencies.Dependencies.CustomerAddressDeps.PSQLCustomer.UpdateCustomer(r.Context(), sessiondata.ID, &customeraddressdomain.CreateCustomer{
 		Username:    updatecustomer.Username,
 		Password:    updatecustomer.Password,
 		FirstName:   updatecustomer.FirstName,
@@ -141,9 +137,7 @@ func DeleteMyProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cd := dependencies.Dependencies.PSQLCustomer
-
-	if err = cd.SoftDeleteCustomer(r.Context(), sessiondata.ID); err != nil {
+	if err = dependencies.Dependencies.CustomerAddressDeps.PSQLCustomer.SoftDeleteCustomer(r.Context(), sessiondata.ID); err != nil {
 		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
 		return
 	}
@@ -163,7 +157,7 @@ func DeleteMyProfile(w http.ResponseWriter, r *http.Request) {
 //	@failure		401	{object}	utils.ErrorResponse
 //	@router			/electromart/v1/customers [get]
 func AllCustomers(w http.ResponseWriter, r *http.Request) {
-	customersAddresses, err := dependencies.Dependencies.PSQLCustomerAddress.AllCustomersAddresses(r.Context())
+	customersAddresses, err := dependencies.Dependencies.CustomerAddressDeps.PSQLCustomerAddress.AllCustomersAddresses(r.Context())
 	if err != nil {
 		utils.ERROR(w, http.StatusInternalServerError, utils.NewInternalServerError(err))
 		return
