@@ -16,6 +16,99 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/electromart/v1/cart": {
+            "get": {
+                "description": "Returns the cart",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cart"
+                ],
+                "summary": "Get the cart",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CartResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/electromart/v1/cart/{productID}": {
+            "post": {
+                "description": "Adds a product to cart",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cart"
+                ],
+                "summary": "Add a product to cart",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "productID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Quantity",
+                        "name": "quantity",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CartResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/electromart/v1/checkout": {
+            "post": {
+                "description": "Creates an order",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shoppingorder"
+                ],
+                "summary": "Create an order",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/shoppingorderdomain.ShoppingOrderResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/electromart/v1/customers": {
             "get": {
                 "security": [
@@ -796,6 +889,28 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.CartItem": {
+            "type": "object",
+            "properties": {
+                "productID": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.CartResponse": {
+            "type": "object",
+            "properties": {
+                "cart_items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.CartItem"
+                    }
+                }
+            }
+        },
         "handlers.LoginLogoutResponse": {
             "description": "This struct will be used to encode the login/logout response",
             "type": "object",
@@ -860,6 +975,72 @@ const docTemplate = `{
                 },
                 "stock": {
                     "type": "integer"
+                }
+            }
+        },
+        "shoppingorderdomain.CustomerResponse": {
+            "type": "object",
+            "properties": {
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/customeraddressdomain.Address"
+                    }
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "shoppingorderdomain.ItemResponse": {
+            "type": "object",
+            "properties": {
+                "product_description": {
+                    "type": "string"
+                },
+                "product_id": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "subtotal": {
+                    "type": "number"
+                }
+            }
+        },
+        "shoppingorderdomain.ShoppingOrderResponse": {
+            "type": "object",
+            "properties": {
+                "customer": {
+                    "$ref": "#/definitions/shoppingorderdomain.CustomerResponse"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/shoppingorderdomain.ItemResponse"
+                    }
+                },
+                "order_id": {
+                    "type": "integer"
+                },
+                "placed_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
                 }
             }
         },

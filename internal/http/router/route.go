@@ -65,6 +65,15 @@ func NewRouter() http.Handler {
 		http.ServeFile(w, r, "public/html/products.html")
 	})
 
+	// Cart endpoint
+	mux.HandleFunc("POST /electromart/v1/cart/{productID}", handlers.AddToCart)
+	mux.HandleFunc("GET /electromart/v1/cart", handlers.GetCart)
+	mux.HandleFunc("GET /electromart/v1/cart/", handlers.GetCart)
+
+	// Checkout endpoint
+	mux.HandleFunc("POST /electromart/v1/checkout", handlers.CreateOrder)
+	mux.HandleFunc("POST /electromart/v1/checkout/", handlers.CreateOrder)
+
 	// showcase handler - the queries we showcase in the report
 
 	mux.HandleFunc("GET /electromart/v1/discounted-products", handlers.CurrentDiscountedProducts)

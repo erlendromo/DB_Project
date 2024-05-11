@@ -57,6 +57,20 @@ definitions:
       primaryAddress:
         type: boolean
     type: object
+  handlers.CartItem:
+    properties:
+      productID:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  handlers.CartResponse:
+    properties:
+      cart_items:
+        items:
+          $ref: '#/definitions/handlers.CartItem'
+        type: array
+    type: object
   handlers.LoginLogoutResponse:
     description: This struct will be used to encode the login/logout response
     properties:
@@ -100,6 +114,49 @@ definitions:
         type: number
       stock:
         type: integer
+    type: object
+  shoppingorderdomain.CustomerResponse:
+    properties:
+      addresses:
+        items:
+          $ref: '#/definitions/customeraddressdomain.Address'
+        type: array
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      phone_number:
+        type: string
+    type: object
+  shoppingorderdomain.ItemResponse:
+    properties:
+      product_description:
+        type: string
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+      subtotal:
+        type: number
+    type: object
+  shoppingorderdomain.ShoppingOrderResponse:
+    properties:
+      customer:
+        $ref: '#/definitions/shoppingorderdomain.CustomerResponse'
+      items:
+        items:
+          $ref: '#/definitions/shoppingorderdomain.ItemResponse'
+        type: array
+      order_id:
+        type: integer
+      placed_at:
+        type: string
+      status:
+        type: string
+      total_amount:
+        type: number
     type: object
   showcasedomain.DiscountedProduct:
     properties:
@@ -185,6 +242,67 @@ info:
   title: Electromart API
   version: "1.0"
 paths:
+  /electromart/v1/cart:
+    get:
+      description: Returns the cart
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CartResponse'
+      summary: Get the cart
+      tags:
+      - cart
+  /electromart/v1/cart/{productID}:
+    post:
+      description: Adds a product to cart
+      parameters:
+      - description: Product ID
+        in: path
+        name: productID
+        required: true
+        type: integer
+      - description: Quantity
+        in: query
+        name: quantity
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CartResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Add a product to cart
+      tags:
+      - cart
+  /electromart/v1/checkout:
+    post:
+      description: Creates an order
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/shoppingorderdomain.ShoppingOrderResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create an order
+      tags:
+      - shoppingorder
   /electromart/v1/customers:
     get:
       description: Get all customers (requires admin login)
