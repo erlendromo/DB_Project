@@ -29,7 +29,7 @@ type LoginLogoutResponse struct {
 //
 //	@title			Login
 //	@summary		Log in
-//	@description	Log in
+//	@description	Log in and set session
 //	@tags			Login
 //	@accept			json
 //	@produce		json
@@ -60,11 +60,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 //
 //	@title			Logout
 //	@summary		Log out
-//	@description	Log out
-//	@tags			Login
+//	@description	Log out and clear session (requires login)
+//	@tags			Logout
 //	@produce		json
 //	@success		200	{object}	LoginLogoutResponse
-//	@failure		500	{object}	utils.ErrorResponse
+//	@failure		401	{object}	utils.ErrorResponse
 //	@router			/electromart/v1/logout [post]
 func Logout(w http.ResponseWriter, r *http.Request) {
 	statuscode, err := middlewares.ClearSession(w, r)

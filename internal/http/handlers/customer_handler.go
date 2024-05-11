@@ -20,6 +20,7 @@ import (
 //	@param			body	body		customeraddressdomain.CreateCustomerAddressRequest	true	"Create customer"
 //	@success		201		{object}	customeraddressdomain.DBCustomerAddress
 //	@failure		422		{object}	utils.ErrorResponse
+//	@failure		500		{object}	utils.ErrorResponse
 //	@router			/electromart/v1/signup [post]
 func Signup(w http.ResponseWriter, r *http.Request) {
 	var signuprequest customeraddressdomain.CreateCustomerAddressRequest
@@ -46,12 +47,13 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 //
 //	@title			MyProfile
 //	@summary		Get my profile
-//	@description	Get my profile
+//	@description	Get my profile (requires login)
 //	@tags			Customer
 //	@security		UserAuth
 //	@produce		json
-//	@success		200	{object}	customeraddressdomain.DBCustomer
+//	@success		200	{object}	customeraddressdomain.CustomerAddresses
 //	@failure		401	{object}	utils.ErrorResponse
+//	@failure		500	{object}	utils.ErrorResponse
 //	@router			/electromart/v1/myprofile [get]
 func MyProfile(w http.ResponseWriter, r *http.Request) {
 	sessiondata, statuscode, err := middlewares.GetUserFromSession(r)
@@ -75,14 +77,16 @@ func MyProfile(w http.ResponseWriter, r *http.Request) {
 //
 //	@title			UpdateMyProfile
 //	@summary		Update my profile
-//	@description	Update my profile
+//	@description	Update my profile (requires login)
 //	@tags			Customer
 //	@security		UserAuth
 //	@accept			json
 //	@produce		json
-//	@param			body	body		customeraddressdomain.CreateCustomer	true	"Update customer"
-//	@success		200		{object}	customeraddressdomain.DBCustomer
+//	@param			body	body		customeraddressdomain.CreateCustomerAddressRequest	true	"Update customer"
+//	@success		200		{object}	customeraddressdomain.CreateCustomerAddressRequest
 //	@failure		401		{object}	utils.ErrorResponse
+//	@failure		422		{object}	utils.ErrorResponse
+//	@failure		500		{object}	utils.ErrorResponse
 //	@router			/electromart/v1/myprofile [put]
 func UpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 	sessiondata, statuscode, err := middlewares.GetUserFromSession(r)
@@ -123,12 +127,13 @@ func UpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 //
 //	@title			DeleteMyProfile
 //	@summary		Delete my profile
-//	@description	Delete my profile
+//	@description	Delete my profile (requires login)
 //	@tags			Customer
 //	@security		UserAuth
 //	@produce		json
-//	@success		200	{json}		message
+//	@success		204
 //	@failure		401	{object}	utils.ErrorResponse
+//	@failure		500	{object}	utils.ErrorResponse
 //	@router			/electromart/v1/myprofile [delete]
 func DeleteMyProfile(w http.ResponseWriter, r *http.Request) {
 	sessiondata, statuscode, err := middlewares.GetUserFromSession(r)
@@ -142,19 +147,20 @@ func DeleteMyProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.JSON(w, http.StatusNoContent, "")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // AllCustomers Get all customers
 //
 //	@title			AllCustomers
 //	@summary		Get all customers
-//	@description	Get all customers
+//	@description	Get all customers (requires admin login)
 //	@tags			Customer
 //	@security		AdminAuth
 //	@produce		json
 //	@success		200	{json}		message
 //	@failure		401	{object}	utils.ErrorResponse
+//	@failure		500	{object}	utils.ErrorResponse
 //	@router			/electromart/v1/customers [get]
 func AllCustomers(w http.ResponseWriter, r *http.Request) {
 	customersAddresses, err := dependencies.Dependencies.CustomerAddressDeps.PSQLCustomerAddress.AllCustomersAddresses(r.Context())
