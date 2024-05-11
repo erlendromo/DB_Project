@@ -38,10 +38,6 @@
     </style>
 </head>
 <body>
-<h1>Product Functionality</h1>
-<div>Logged in as: <span id="role">Role</span> - <span id="username">Username</span></div>
-<br>
-<br>
 <div class="container">
     <div class="left">
         <section>
@@ -69,7 +65,7 @@
         <br>
         <section>
             <h2>Functionality Logged In Users Can Do</h2>
-            <!-- Add the functionalities that only logged in users can do -->
+            <!-- functionalities that only logged in users can do -->
         </section>
         <br>
         <br>
@@ -106,8 +102,30 @@
 
     </div>
     <div class="right">
+
+        <h2>User information</h2>
+
+        <p>User username: bob_brown password: password101 </p>
+        <p>Admin username: admin password: admin </p>
+
+        <form id="loginForm">
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUsername" name="username" required>
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" name="password" required>
+            <button type="submit">Login</button>
+        </form>
+
+        <button id="logout">Logout</button>
+
+        <!-- Display the current user role and username -->
+        <div>Logged in as: <span id="role">Role</span> - <span id="username">Username</span></div>
+
+        <h2>Results</h2>
         <pre id="dataDisplay"></pre>
+
     </div>
+
 
 </div>
 
@@ -229,6 +247,54 @@
             });
         });
     });
+
+
+    // Handle login
+    $('#loginForm').on('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        var username = $('#loginUsername').val();
+        var password = $('#loginPassword').val();
+        var loginData = {
+            username: username,
+            password: password
+        };
+
+        $.ajax({
+            url: '/electromart/v1/login',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(loginData),
+            success: function(data, textStatus, jqXHR) {
+                console.log("Logged in successfully:", data);
+                // Here you might set cookies or update UI with session info
+                $('#dataDisplay').html("Logged in successfully!");
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Login failed:", textStatus, errorThrown);
+                $('#dataDisplay').html("Login failed: " + textStatus);
+            }
+        });
+    });
+
+    // Handle logout
+    $('#logout').click(function() {
+        $.ajax({
+            url: '/electromart/v1/logout',
+            type: 'POST',
+            success: function(data) {
+                console.log("Logged out successfully:", data);
+                // Here you would clear cookies or session storage
+                $('#dataDisplay').html("Logged out successfully!");
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Logout failed:", textStatus, errorThrown);
+                $('#dataDisplay').html("Logout failed: " + textStatus);
+            }
+        });
+    });
+
+
 
 
 </script>
