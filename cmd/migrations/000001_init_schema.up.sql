@@ -60,14 +60,14 @@ CREATE TABLE IF NOT EXISTS "product" (
 CREATE INDEX product_description_fts_idx ON product USING gin(to_tsvector('english', description));
 
 CREATE TABLE IF NOT EXISTS "product_discount" (
-  "product_id" INTEGER NOT NULL REFERENCES "product" ("id"),
-  "discount_id" INTEGER NOT NULL REFERENCES "discount" ("id"),
-  PRIMARY KEY ("product_id", "discount_id")
+"product_id" INTEGER NOT NULL REFERENCES "product" ("id") ON DELETE CASCADE, -- allows deletion of products that have an discount
+"discount_id" INTEGER NOT NULL REFERENCES "discount" ("id"),
+PRIMARY KEY ("product_id", "discount_id")
 );
 
 CREATE TABLE IF NOT EXISTS "customer_product_review" (
   "customer_id" INTEGER NOT NULL REFERENCES "customer" ("id"),
-  "product_id" INTEGER NOT NULL REFERENCES "product" ("id"),
+  "product_id" INTEGER NOT NULL REFERENCES "product" ("id") ON DELETE CASCADE,
   "stars" NUMERIC(2,1) NOT NULL,
   "comment" VARCHAR(255),
   "deleted" BOOLEAN NOT NULL DEFAULT FALSE,

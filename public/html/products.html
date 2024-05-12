@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Product Functionality</title>
+    <title>Product functionality</title>
+    <p>This is just some example endpoints, see the appendix in the project report for more endpoints. You must use the buttons with mouse click, enter key will not work. First time UI.</p>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <style>
         body, html {
@@ -28,6 +29,10 @@
             padding: 10px;
             box-sizing: border-box;
         }
+        p {
+            margin-bottom: 0;
+            margin-top: 0;
+        }
         pre {
             background-color: #f4f4f4;
             border: 1px solid #ddd;
@@ -35,23 +40,24 @@
             overflow: auto;
             font-family: 'Courier New', Courier, monospace;
         }
+        #logout {
+            display: none; /* hide logout button initially */
+        }
     </style>
 </head>
 <body>
-<h1>Product Functionality</h1>
-<div>Logged in as: <span id="role">Role</span> - <span id="username">Username</span></div>
-<br>
-<br>
 <div class="container">
     <div class="left">
         <section>
-            <h2>Functionality Everyone Can Do</h2>
+            <h2>Some functionality everyone can do</h2>
+            <p>Get all products in the store</p>
             <button id="getAllProducts">Get All Products</button>
             <div id="products"></div>
 
             <br>
             <br>
 
+            <p>Search products by full word, "tv" or "Bosch"</p>
             <input type="text" id="search" placeholder="Search products...">
             <button id="searchProduct">Search</button>
             <div id="searchResults"></div>
@@ -59,6 +65,7 @@
             <br>
             <br>
 
+            <p>Get a product with its reviews by id, only integers, for example: "1"</p>
             <input type="text" id="productId" placeholder="Product ID...">
             <button id="getProduct">Get Product</button>
             <div id="productDetails"></div>
@@ -68,17 +75,43 @@
         <br>
         <br>
         <section>
-            <h2>Functionality Logged In Users Can Do</h2>
-            <!-- Add the functionalities that only logged in users can do -->
+            <h2>Functionality logged in users can do</h2>
+
+            <!-- Add a Product to Cart -->
+            <div>
+                <input type="text" id="itemID" placeholder="Item ID">
+                <input type="number" id="itemQuantity" placeholder="Quantity">
+                <button id="addToCart">Add to cart</button>
+            </div>
+
+            <br>
+
+            <button id="showCart">Show cart</button>
+
+            <br>
+
+            <!-- Checkout -->
+            <div>
+                <p>The order will be checked out with the relation "no payment", ready to be taken to a third party payment solution and be given a payment.</p>
+                <p>Admins can fetch the order and see its details</p>
+                <button id="checkout">Checkout</button>
+            </div>
         </section>
+
         <br>
         <br>
         <br>
         <br>
         <section>
-            <h2>Functionality Admins Can Do</h2>
+            <h2>Some functionality admins can do</h2>
+            <!-- See an order -->
+            <div>
+                <input type="text" id="orderID" placeholder="Order ID">
+                <button id="showOrder">Show order</button>
+            </div>
+
             <!-- Post Product -->
-            <p>All input fields must have some text, Category and Manufacturer must match existing entities</p>
+            <p>All fields must be populated, Category and Manufacturer must match existing entities</p>
             <input type="text" id="newProductDescription" placeholder="Product Description">
             <input type="number" id="newProductPrice" placeholder="Price">
             <input type="number" id="newProductStock" placeholder="Stock">
@@ -89,6 +122,7 @@
             <br>
             <br>
             <!-- Patch Product -->
+            <p>Only fields populated will be affected</p>
             <input type="text" id="patchProductDescription" placeholder="New Description">
             <input type="number" id="patchProductPrice" placeholder="New Price">
             <input type="number" id="patchProductStock" placeholder="New Stock">
@@ -99,6 +133,7 @@
             <br>
             <br>
             <!-- Delete Product -->
+            <p>You cannot delete products associated with discounts or other orders</p>
             <input type="text" id="deleteProductId" placeholder="Product ID">
             <button id="deleteProduct">Delete Product</button>
             <div id="deleteProductResult"></div>
@@ -106,8 +141,55 @@
 
     </div>
     <div class="right">
+
+        <h2>User information</h2>
+
+        <p>Register an user</p>
+        <p>If you register an account you will get an unspecific error if username is already taken</p>
+        <form id="registrationForm" style="display:block;">
+            <h2>Register</h2>
+            <label for="registerUsername">Username:</label>
+            <input type="text" id="registerUsername" name="username" required>
+            <label for="registerEmail">Email:</label>
+            <input type="email" id="registerEmail" name="email" required>
+            <label for="registerFirstName">First Name:</label>
+            <input type="text" id="registerFirstName" name="first_name" required>
+            <label for="registerLastName">Last Name:</label>
+            <input type="text" id="registerLastName" name="last_name" required>
+            <label for="registerPhone">Phone Number:</label>
+            <input type="text" id="registerPhone" name="phone_number" required>
+            <label for="registerStreet">Street:</label>
+            <input type="text" id="registerStreet" name="street" required>
+            <label for="registerZipCode">Zip Code:</label>
+            <input type="text" id="registerZipCode" name="zip_code" required>
+            <label for="registerPassword">Password:</label>
+            <input type="password" id="registerPassword" name="password" required>
+            <button type="submit">Register</button>
+        </form>
+
+
+        <p>Log in to already created users:</p>
+        <p>User username: bob_brown password: password101 </p>
+        <p>Admin username: admin password: admin </p>
+
+        <form id="loginForm">
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUsername" name="username" required>
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" name="password" required>
+            <button type="submit">Login</button>
+        </form>
+
+        <button id="logout">Logout</button>
+
+        <!-- Display the current user role and username -->
+        <div>Logged in as: <span id="username">Not logged in</span></div>
+
+        <h2>Results</h2>
         <pre id="dataDisplay"></pre>
+
     </div>
+
 
 </div>
 
@@ -228,9 +310,146 @@
                 }
             });
         });
+
+        // Handle login
+        $('#loginForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            var username = $('#loginUsername').val();
+            var password = $('#loginPassword').val();
+            var loginData = {
+                username: username,
+                password: password
+            };
+
+            $.ajax({
+                url: '/electromart/v1/login',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(loginData),
+                success: function(data, textStatus, jqXHR) {
+                    console.log("Logged in successfully:", data);
+                    $('#dataDisplay').html("Logged in successfully!");
+                    $('#username').text(username); // Display the logged in username
+                    $('#loginForm').hide(); // Hide the login form
+                    $('#logout').show(); // Show the logout button
+                    $('#registrationForm').hide(); // Hide the registration form on login
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Login failed:", textStatus, errorThrown);
+                    $('#dataDisplay').html("Login failed: " + textStatus);
+                }
+            });
+        });
+
+        // Handle logout
+        $('#logout').click(function() {
+            $.ajax({
+                url: '/electromart/v1/logout',
+                type: 'POST',
+                success: function(data) {
+                    console.log("Logged out successfully:", data);
+                    $('#dataDisplay').html("Logged out successfully!");
+                    $('#username').text("Not logged in"); // Reset the username display
+                    $('#logout').hide(); // Hide the logout button
+                    $('#loginForm').show(); // Show the login form
+                    $('#registrationForm').show(); // Show the registration form after logout
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Logout failed:", textStatus, errorThrown);
+                    $('#dataDisplay').html("Logout failed: " + textStatus);
+                }
+            });
+        });
+
+        // Handle adding a product to the cart
+        $('#addToCart').click(function() {
+            var itemID = $('#itemID').val();
+            var itemQuantity = $('#itemQuantity').val();
+
+            if (itemID && itemQuantity) {
+                $.ajax({
+                    url: '/electromart/v1/cart/' + itemID + '?quantity=' + itemQuantity,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    success: function(data) {
+                        console.log("Added to cart successfully:", data);
+                        $('#dataDisplay').html("Added to cart successfully!");
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error("Failed to add to cart:", textStatus, errorThrown);
+                        $('#dataDisplay').html("Failed to add to cart: " + textStatus);
+                    }
+                });
+            } else {
+                $('#dataDisplay').html("Please enter both item ID and quantity.");
+            }
+        });
+
+        // Handle displaying the cart
+        $('#showCart').click(function() {
+            $.ajax({
+                url: '/electromart/v1/cart',
+                type: 'GET',
+                success: function(data) {
+                    console.log("Cart data:", data);
+                    $('#dataDisplay').html(JSON.stringify(data, null, 4));
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Failed to retrieve cart:", textStatus, errorThrown);
+                    $('#dataDisplay').html("Failed to retrieve cart: " + textStatus);
+                }
+            });
+        });
+
+        // Handle checkout
+        $('#checkout').click(function() {
+            $.ajax({
+                url: '/electromart/v1/checkout',
+                type: 'POST',
+                success: function(data) {
+                    console.log("Checkout successful:", data);
+                    $('#dataDisplay').html("Checkout successful!");
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Checkout failed:", textStatus, errorThrown);
+                    $('#dataDisplay').html("Checkout failed: " + textStatus);
+                }
+            });
+        });
+
+        // Handle registration
+        $('#registrationForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            var registrationData = {
+                username: $('#registerUsername').val(),
+                email: $('#registerEmail').val(),
+                first_name: $('#registerFirstName').val(),
+                last_name: $('#registerLastName').val(),
+                phone_number: $('#registerPhone').val(),
+                street: $('#registerStreet').val(),
+                zip_code: $('#registerZipCode').val(),
+                password: $('#registerPassword').val()
+            };
+
+            $.ajax({
+                url: 'http://localhost:8080/electromart/v1/signup',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(registrationData),
+                success: function(data) {
+                    console.log("Registration successful:", data);
+                    $('#dataDisplay').html("Registration successful!");
+                    $('#registrationForm').hide(); // Hide the registration form
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Registration failed:", textStatus, errorThrown);
+                    $('#dataDisplay').html("Registration failed: " + textStatus);
+                }
+            });
+        });
+
     });
-
-
 </script>
 </body>
 </html>
