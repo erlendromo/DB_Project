@@ -40,13 +40,39 @@ func (psql *PSQLProduct) GetAllProducts() ([]*productdomain.Product, error) {
 	return products, nil
 }
 
-func (psql *PSQLProduct) GetProduct(id string) (*productdomain.Product, error) {
+func (psql *PSQLProduct) GetProduct(id string) (*productdomain.ProductDetail, error) {
+	// Fetch the product details as before
 	row := psql.DB.QueryRow("SELECT * FROM product WHERE id = $1", id)
-
-	var p productdomain.Product
+	var p productdomain.ProductDetail
 	err := row.Scan(&p.ID, &p.CategoryName, &p.ManufacturerName, &p.Description, &p.Price, &p.Stock)
 	if err != nil {
 		return nil, err
+	}
+
+	// Fetch reviews and calculate the average rating
+	rows, err := psql.DB.Query(`
+        SELECT customer_id, stars, comment 
+        FROM customer_product_review 
+        WHERE product_id = $1 AND deleted = FALSE`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var totalStars float64
+	var reviewCount float64
+	for rows.Next() {
+		var review productdomain.Review
+		if err := rows.Scan(&review.CustomerID, &review.Stars, &review.Comment); err != nil {
+			continue // Handle error appropriately
+		}
+		p.Reviews = append(p.Reviews, review)
+		totalStars += review.Stars
+		reviewCount++
+	}
+
+	if reviewCount > 0 {
+		p.AverageRating = totalStars / reviewCount
 	}
 
 	return &p, nil

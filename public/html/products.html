@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Product functionality</title>
-    <p>This is just some example endpoints, see the appendix in the project report for more endpoints.</p>
+    <p>This is just some example endpoints, see the appendix in the project report for more endpoints. You must use the buttons with mouse click, enter key will not work. First time UI.</p>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <style>
         body, html {
@@ -50,12 +50,14 @@
     <div class="left">
         <section>
             <h2>Some functionality everyone can do</h2>
+            <p>Get all products in the store</p>
             <button id="getAllProducts">Get All Products</button>
             <div id="products"></div>
 
             <br>
             <br>
 
+            <p>Search products by full word, "tv" or "Bosch"</p>
             <input type="text" id="search" placeholder="Search products...">
             <button id="searchProduct">Search</button>
             <div id="searchResults"></div>
@@ -63,6 +65,7 @@
             <br>
             <br>
 
+            <p>Get a product with its reviews by id, only integers, for example: "1"</p>
             <input type="text" id="productId" placeholder="Product ID...">
             <button id="getProduct">Get Product</button>
             <div id="productDetails"></div>
@@ -89,6 +92,8 @@
 
             <!-- Checkout -->
             <div>
+                <p>The order will be checked out with the relation "no payment", ready to be taken to a third party payment solution and be given a payment.</p>
+                <p>Admins can fetch the order and see its details</p>
                 <button id="checkout">Checkout</button>
             </div>
         </section>
@@ -99,6 +104,12 @@
         <br>
         <section>
             <h2>Some functionality admins can do</h2>
+            <!-- See an order -->
+            <div>
+                <input type="text" id="orderID" placeholder="Order ID">
+                <button id="showOrder">Show order</button>
+            </div>
+
             <!-- Post Product -->
             <p>All fields must be populated, Category and Manufacturer must match existing entities</p>
             <input type="text" id="newProductDescription" placeholder="Product Description">
@@ -287,7 +298,7 @@
             };
 
             $.ajax({
-                url: '/electromart/v1/customers/login',
+                url: '/electromart/v1/login',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(loginData),
@@ -308,7 +319,7 @@
         // Handle logout
         $('#logout').click(function() {
             $.ajax({
-                url: '/electromart/v1/customers/logout',
+                url: '/electromart/v1/logout',
                 type: 'POST',
                 success: function(data) {
                     console.log("Logged out successfully:", data);
