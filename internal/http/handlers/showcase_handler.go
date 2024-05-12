@@ -45,7 +45,6 @@ func TopCustomers(w http.ResponseWriter, r *http.Request) {
 //	@failure		500		{object}	utils.ErrorResponse
 //	@router			/electromart/v1/orders/{orderID}/details [get]
 func OrderWithDetails(w http.ResponseWriter, r *http.Request) {
-
 	orderId := r.PathValue("orderID")
 
 	orderDetails, err := dependencies.Dependencies.ShowcaseDeps.PSQLShowcase.FetchOrderWithDetails(orderId)

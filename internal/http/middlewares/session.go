@@ -7,7 +7,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 )
@@ -50,8 +49,6 @@ func SetSession(w http.ResponseWriter, username string) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("Generated Session ID: %s\n", sessionID)
 
 	c, err := dependencies.Dependencies.CustomerAddressDeps.PSQLCustomer.GetCustomerByUsername(context.Background(), username)
 	if err != nil {
@@ -116,8 +113,6 @@ func GetUserFromSession(r *http.Request) (SessionData, int, error) {
 	if err != nil {
 		return SessionData{}, http.StatusUnauthorized, errors.New("session not found")
 	}
-
-	fmt.Printf("Retrieved Session ID: %s\n", cookie.Value)
 
 	sessionData, exists := sessions[cookie.Value]
 	if !exists {

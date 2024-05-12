@@ -36,12 +36,6 @@ func NewRouter() http.Handler {
 	mux.HandleFunc("DELETE /electromart/v1/me", handlers.DeleteMyProfile)
 	mux.HandleFunc("DELETE /electromart/v1/me/", handlers.DeleteMyProfile)
 
-	// Customers endpoints
-	mux.HandleFunc("GET /electromart/v1/customers", middlewares.AdminMiddleware(handlers.AllCustomers))
-	mux.HandleFunc("GET /electromart/v1/customers/", middlewares.AdminMiddleware(handlers.AllCustomers))
-
-	mux.HandleFunc("GET /electromart/v1/customers/top/{limit}", middlewares.AdminMiddleware(handlers.TopCustomers))
-
 	// Products endpoint
 	mux.HandleFunc("GET /electromart/v1/products", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("html") == "true" {
@@ -92,6 +86,12 @@ func NewRouter() http.Handler {
 
 	mux.HandleFunc("GET /electromart/v1/orders/{orderID}/details", middlewares.AdminMiddleware(handlers.OrderWithDetails))
 	mux.HandleFunc("GET /electromart/v1/orders/{orderID}/details/", middlewares.AdminMiddleware(handlers.OrderWithDetails))
+
+	// Customers endpoints
+	mux.HandleFunc("GET /electromart/v1/customers", middlewares.AdminMiddleware(handlers.AllCustomers))
+	mux.HandleFunc("GET /electromart/v1/customers/", middlewares.AdminMiddleware(handlers.AllCustomers))
+
+	mux.HandleFunc("GET /electromart/v1/customers/top/{limit}", middlewares.AdminMiddleware(handlers.TopCustomers))
 
 	return mux
 }
