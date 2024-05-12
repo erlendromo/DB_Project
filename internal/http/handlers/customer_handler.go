@@ -21,7 +21,7 @@ import (
 //	@success		201		{object}	customeraddressdomain.DBCustomerAddress
 //	@failure		422		{object}	utils.ErrorResponse
 //	@failure		500		{object}	utils.ErrorResponse
-//	@router			/electromart/v1/customers/signup [post]
+//	@router			/electromart/v1/signup [post]
 func Signup(w http.ResponseWriter, r *http.Request) {
 	var signuprequest customeraddressdomain.CreateCustomerAddressRequest
 	if err := json.NewDecoder(r.Body).Decode(&signuprequest); err != nil {
@@ -54,7 +54,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 //	@success		200	{object}	customeraddressdomain.CustomerAddresses
 //	@failure		401	{object}	utils.ErrorResponse
 //	@failure		500	{object}	utils.ErrorResponse
-//	@router			/electromart/v1/customers/me [get]
+//	@router			/electromart/v1/me [get]
 func MyProfile(w http.ResponseWriter, r *http.Request) {
 	sessiondata, statuscode, err := middlewares.GetUserFromSession(r)
 	if err != nil {
@@ -87,7 +87,7 @@ func MyProfile(w http.ResponseWriter, r *http.Request) {
 //	@failure		401		{object}	utils.ErrorResponse
 //	@failure		422		{object}	utils.ErrorResponse
 //	@failure		500		{object}	utils.ErrorResponse
-//	@router			/electromart/v1/customers/me [put]
+//	@router			/electromart/v1/me [put]
 func UpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 	sessiondata, statuscode, err := middlewares.GetUserFromSession(r)
 	if err != nil {
@@ -134,7 +134,7 @@ func UpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 //	@success		204
 //	@failure		401	{object}	utils.ErrorResponse
 //	@failure		500	{object}	utils.ErrorResponse
-//	@router			/electromart/v1/customers/me [delete]
+//	@router			/electromart/v1/me [delete]
 func DeleteMyProfile(w http.ResponseWriter, r *http.Request) {
 	sessiondata, statuscode, err := middlewares.GetUserFromSession(r)
 	if err != nil {

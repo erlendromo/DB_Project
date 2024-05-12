@@ -294,7 +294,7 @@ paths:
       - cart
   /electromart/v1/checkout:
     post:
-      description: Creates an order
+      description: Creates an order for a logged in customer
       produces:
       - application/json
       responses:
@@ -302,12 +302,12 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/shoppingorderdomain.ShoppingOrderResponse'
-        "401":
-          description: Unauthorized
+        "400":
+          description: Bad Request
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Create an order
@@ -336,53 +336,6 @@ paths:
       summary: Get all customers
       tags:
       - Customer
-  /electromart/v1/customers/login:
-    post:
-      consumes:
-      - application/json
-      description: Login and set session
-      parameters:
-      - description: Login request
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/handlers.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handlers.LoginResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-      summary: Login
-      tags:
-      - Login
-  /electromart/v1/customers/logout:
-    post:
-      description: Log out and clear session (requires login)
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handlers.LogoutResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-      summary: Log out
-      tags:
-      - Logout
   /electromart/v1/customers/me:
     delete:
       description: Delete my profile (requires login)
@@ -461,36 +414,6 @@ paths:
       summary: Update my profile
       tags:
       - Customer
-  /electromart/v1/customers/signup:
-    post:
-      consumes:
-      - application/json
-      description: Create a new customer
-      parameters:
-      - description: Create customer
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/customeraddressdomain.CreateCustomerAddressRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/customeraddressdomain.DBCustomerAddress'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-      summary: Create a new customer
-      tags:
-      - Customer
   /electromart/v1/customers/top/{limit}:
     get:
       description: Identify top customers (requires admin login)
@@ -522,13 +445,110 @@ paths:
       summary: Identify top customers
       tags:
       - Showcase
-  /electromart/v1/orders/{orderId}/details:
+  /electromart/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Login and set session
+      parameters:
+      - description: Login request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Login
+      tags:
+      - Login
+  /electromart/v1/logout:
+    post:
+      description: Log out and clear session (requires login)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LogoutResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Log out
+      tags:
+      - Logout
+  /electromart/v1/orders:
+    get:
+      description: Gets all orders of a logged in customer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/shoppingorderdomain.ShoppingOrderResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all orders
+      tags:
+      - shoppingorder
+  /electromart/v1/orders/{orderID}:
+    get:
+      description: Gets an order by ID of a logged in customer
+      parameters:
+      - description: Order ID
+        in: path
+        name: orderID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shoppingorderdomain.ShoppingOrderResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get an order by ID
+      tags:
+      - shoppingorder
+  /electromart/v1/orders/{orderID}/details:
     get:
       description: Fetch order with details (requires admin login)
       parameters:
       - description: Order ID
         in: path
-        name: orderId
+        name: orderID
         required: true
         type: string
       produces:
@@ -740,7 +760,7 @@ paths:
       summary: Get products based on full text search
       tags:
       - Products
-  /electromart/v1/products/sales:
+  /electromart/v1/products/sales-per-product:
     get:
       description: Calculate total sales per product
       produces:
@@ -759,4 +779,34 @@ paths:
       summary: Calculate total sales per product
       tags:
       - Showcase
+  /electromart/v1/signup:
+    post:
+      consumes:
+      - application/json
+      description: Create a new customer
+      parameters:
+      - description: Create customer
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/customeraddressdomain.CreateCustomerAddressRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/customeraddressdomain.DBCustomerAddress'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a new customer
+      tags:
+      - Customer
 swagger: "2.0"
