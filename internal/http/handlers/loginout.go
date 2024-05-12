@@ -49,7 +49,7 @@ type LogoutResponse struct {
 //	@success		200		{object}	LoginResponse
 //	@failure		400		{object}	utils.ErrorResponse
 //	@failure		500		{object}	utils.ErrorResponse
-//	@router			/electromart/v1/customers/login [post]
+//	@router			/electromart/v1/login [post]
 func Login(w http.ResponseWriter, r *http.Request) {
 	var loginRequest LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&loginRequest)
@@ -98,7 +98,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 //	@produce		json
 //	@success		200	{object}	LogoutResponse
 //	@failure		401	{object}	utils.ErrorResponse
-//	@router			/electromart/v1/customers/logout [post]
+//	@router			/electromart/v1/logout [post]
 func Logout(w http.ResponseWriter, r *http.Request) {
 	statuscode, err := middlewares.ClearSession(w, r)
 	if err != nil {

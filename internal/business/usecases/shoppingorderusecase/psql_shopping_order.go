@@ -102,29 +102,127 @@ func (psql *PSQLShoppingOrder) CreateOrder(ctx context.Context, customerID int, 
 	return shoppingOrderResponse, nil
 }
 
-func (psql *PSQLShoppingOrder) GetOrderByID(ctx context.Context, customerID, shoppingOrderID int) string {
+func (psql *PSQLShoppingOrder) GetOrderByID(ctx context.Context, customerID, shoppingOrderID int) (*shoppingorderdomain.ShoppingOrderResponse, error) {
 	// STEP 1: Query "customer_address" table with customerID
 	// STEP 2: Query "item" table with shoppingOrderID
 	// STEP 3: Query "product" table with productID from "item" table
 	// STEP 4: Return the result
 
-	return "GetOrderByID"
+	tx, err := psql.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	defer tx.Rollback()
+
+	customerAddr, err := psql.PSQLCustomerAddress.GetCustomerAddressesByCustomerID(ctx, customerID)
+	if err != nil {
+		return nil, err
+	}
+
+	row := tx.QueryRow(`SELECT id, placed_at, total_amount, status FROM shopping_order WHERE id = $1`, shoppingOrderID)
+	var shoppingOrder shoppingorderdomain.DBShoppingOrder
+	if err := row.Scan(&shoppingOrder.ID, &shoppingOrder.PlacedAt, &shoppingOrder.TotalAmount, &shoppingOrder.Status); err != nil {
+		return nil, err
+	}
+
+	rows, err := tx.Query(`SELECT id, shopping_order_id, product_id, quantity, sub_total FROM item WHERE shopping_order_id = $1`, shoppingOrderID)
+	if err != nil {
+		return nil, err
+	}
+
+	responseItems := make([]shoppingorderdomain.ItemResponse, 0)
+	for rows.Next() {
+		var item shoppingorderdomain.DBItem
+		if err := rows.Scan(&item.ID, &item.ShoppingOrderID, &item.ProductID, &item.Quantity, &item.Subtotal); err != nil {
+			return nil, err
+		}
+
+		tx2, err := psql.DB.BeginTx(ctx, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		defer tx.Rollback()
+
+		row := tx2.QueryRow("SELECT id, category_name, manufacturer_name, description, price, stock FROM product WHERE id = $1", &item.ProductID)
+		var product shoppingorderdomain.DBProduct
+		if err := row.Scan(&product.ID, &product.CategoryName, &product.ManufacturerName, &product.Description, &product.Price, &product.Stock); err != nil {
+			return nil, err
+		}
+
+		responseItems = append(responseItems, shoppingorderdomain.ItemResponse{
+			ProductID:          item.ProductID,
+			ProductDescription: product.Description,
+			Quantity:           item.Quantity,
+			Subtotal:           item.Subtotal,
+		})
+
+		if err := tx2.Commit(); err != nil {
+			return nil, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	shoppingOrderResponse := &shoppingorderdomain.ShoppingOrderResponse{
+		OrderID: shoppingOrder.ID,
+		Customer: shoppingorderdomain.CustomerResponse{
+			FirstName:   customerAddr.FirstName,
+			LastName:    customerAddr.LastName,
+			Email:       customerAddr.Email,
+			PhoneNumber: customerAddr.PhoneNumber,
+			Addresses:   customerAddr.Addresses,
+		},
+		PlacedAt:    shoppingOrder.PlacedAt,
+		TotalAmount: shoppingOrder.TotalAmount,
+		Status:      shoppingOrder.Status,
+		Items:       responseItems,
+	}
+
+	return shoppingOrderResponse, nil
+
 }
 
-func (psql *PSQLShoppingOrder) GetOrders(ctx context.Context, customerID int) string {
+func (psql *PSQLShoppingOrder) GetOrders(ctx context.Context, customerID int) ([]*shoppingorderdomain.ShoppingOrderResponse, error) {
 	// STEP 1: Query "customer_address" table with customerID
 	// STEP 2: Query "item" table with shoppingOrderID
 	// STEP 3: Query "product" table with productID from "item" table
 	// STEP 4: Populate a list of shopping orders
 	// STEP 5: Return the result
 
-	return "GetAllOrders"
-}
+	tx, err := psql.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
 
-func (psql *PSQLShoppingOrder) UpdateOrder(ctx context.Context, customerID, shoppingOrderID int, items map[int]int) string {
-	// STEP 1: Update "shopping_order" table
-	// STEP 2: Update "item" table
-	// STEP 3: Return the result
+	defer tx.Rollback()
 
-	return "UpdateOrder"
+	rows, err := tx.QueryContext(ctx, "SELECT id FROM shopping_order WHERE customer_id = $1", customerID)
+	if err != nil {
+		return nil, err
+	}
+
+	shoppingOrderResponses := make([]*shoppingorderdomain.ShoppingOrderResponse, 0)
+	for rows.Next() {
+		var shoppingOrderID int
+		if err := rows.Scan(&shoppingOrderID); err != nil {
+			return nil, err
+		}
+
+		shoppingOrderResponse, err := psql.GetOrderByID(ctx, customerID, shoppingOrderID)
+		if err != nil {
+			return nil, err
+		}
+
+		shoppingOrderResponses = append(shoppingOrderResponses, shoppingOrderResponse)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return shoppingOrderResponses, nil
 }

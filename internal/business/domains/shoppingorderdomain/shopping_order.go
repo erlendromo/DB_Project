@@ -7,9 +7,8 @@ import (
 
 type ShoppingOrderDomain interface {
 	CreateOrder(ctx context.Context, customerID int, items map[int]int) (*ShoppingOrderResponse, error)
-	GetOrderByID(ctx context.Context, customerID, shoppingOrderID int) string
-	GetOrders(ctx context.Context, customerID int) string
-	UpdateOrder(ctx context.Context, customerID, shoppingOrderID int, items map[int]int) string
+	GetOrderByID(ctx context.Context, customerID, shoppingOrderID int) (*ShoppingOrderResponse, error)
+	GetOrders(ctx context.Context, customerID int) ([]*ShoppingOrderResponse, error)
 }
 
 // Database

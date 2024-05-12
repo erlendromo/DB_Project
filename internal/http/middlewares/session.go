@@ -50,9 +50,7 @@ func SetSession(w http.ResponseWriter, username string) error {
 		return err
 	}
 
-	cd := dependencies.Dependencies.CustomerAddressDeps.PSQLCustomer
-
-	c, err := cd.GetCustomerByUsername(context.Background(), username)
+	c, err := dependencies.Dependencies.CustomerAddressDeps.PSQLCustomer.GetCustomerByUsername(context.Background(), username)
 	if err != nil {
 		return err
 	}
