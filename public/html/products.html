@@ -144,6 +144,31 @@
 
         <h2>User information</h2>
 
+        <p>Register an user</p>
+        <p>If you register an account you will get an unspecific error if username is already taken</p>
+        <form id="registrationForm" style="display:block;">
+            <h2>Register</h2>
+            <label for="registerUsername">Username:</label>
+            <input type="text" id="registerUsername" name="username" required>
+            <label for="registerEmail">Email:</label>
+            <input type="email" id="registerEmail" name="email" required>
+            <label for="registerFirstName">First Name:</label>
+            <input type="text" id="registerFirstName" name="first_name" required>
+            <label for="registerLastName">Last Name:</label>
+            <input type="text" id="registerLastName" name="last_name" required>
+            <label for="registerPhone">Phone Number:</label>
+            <input type="text" id="registerPhone" name="phone_number" required>
+            <label for="registerStreet">Street:</label>
+            <input type="text" id="registerStreet" name="street" required>
+            <label for="registerZipCode">Zip Code:</label>
+            <input type="text" id="registerZipCode" name="zip_code" required>
+            <label for="registerPassword">Password:</label>
+            <input type="password" id="registerPassword" name="password" required>
+            <button type="submit">Register</button>
+        </form>
+
+
+        <p>Log in to already created users:</p>
         <p>User username: bob_brown password: password101 </p>
         <p>Admin username: admin password: admin </p>
 
@@ -308,6 +333,7 @@
                     $('#username').text(username); // Display the logged in username
                     $('#loginForm').hide(); // Hide the login form
                     $('#logout').show(); // Show the logout button
+                    $('#registrationForm').hide(); // Hide the registration form on login
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.error("Login failed:", textStatus, errorThrown);
@@ -327,6 +353,7 @@
                     $('#username').text("Not logged in"); // Reset the username display
                     $('#logout').hide(); // Hide the logout button
                     $('#loginForm').show(); // Show the login form
+                    $('#registrationForm').show(); // Show the registration form after logout
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.error("Logout failed:", textStatus, errorThrown);
@@ -390,6 +417,38 @@
                 }
             });
         });
+
+        // Handle registration
+        $('#registrationForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            var registrationData = {
+                username: $('#registerUsername').val(),
+                email: $('#registerEmail').val(),
+                first_name: $('#registerFirstName').val(),
+                last_name: $('#registerLastName').val(),
+                phone_number: $('#registerPhone').val(),
+                street: $('#registerStreet').val(),
+                zip_code: $('#registerZipCode').val(),
+                password: $('#registerPassword').val()
+            };
+
+            $.ajax({
+                url: 'http://localhost:8080/electromart/v1/signup',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(registrationData),
+                success: function(data) {
+                    console.log("Registration successful:", data);
+                    $('#dataDisplay').html("Registration successful!");
+                    $('#registrationForm').hide(); // Hide the registration form
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Registration failed:", textStatus, errorThrown);
+                    $('#dataDisplay').html("Registration failed: " + textStatus);
+                }
+            });
+        });
+
     });
 </script>
 </body>
